@@ -136,28 +136,80 @@ class SynthiaChatEngine:
             step1_content = beginner_steps.get('step1', {}).get('scene_gear_overview', '')
             step1_content = self._personalize_gear_recommendations(step1_content, matched_gear)
             
-            # Handle special cases
+            # Handle special cases and triggers
             step1_content = self._apply_special_case_triggers(step1_content, message, matched_gear)
             
-            full_content = f"{intake_summary}\n\n🟦 **Step 1: Scene & Gear Overview**\n{step1_content}\n\nReady for Step 2: Lighting Setup?"
+            # Check if we need to skip lighting step for certain scenarios
+            skip_lighting = self._should_skip_lighting_step(message, matched_gear)
+            next_step_text = "Lighting Setup" if not skip_lighting else "Posing & Composition"
+            
+            full_content = f"{intake_summary}\n\n🟦 **Step 1: Scene & Gear Overview**\n{step1_content}\n\nReady for Step 2: {next_step_text}?"
             
             return {
                 'content': full_content,
                 'step_number': 1,
                 'next_step': 1,
                 'awaiting_continuation': True,
-                'context': {'photography_style': photography_style, 'matched_gear': self._serialize_gear(matched_gear)}
+                'context': {
+                    'photography_style': photography_style, 
+                    'matched_gear': self._serialize_gear(matched_gear),
+                    'skip_lighting': skip_lighting
+                }
             }
         
-        return self._handle_beginner_continuation(chat_session, user_gear)
+        return self._handle_beginner_continuation(chat_session, matched_gear)
     
-    def _handle_beginner_continuation(self, chat_session: ChatSession, user_gear: List[GearItem]) -> Dict[str, Any]:
+    def _should_skip_lighting_step(self, message: str, matched_gear: Dict[str, List[GearItem]]) -> bool:
+        """Check if we should skip the lighting step for special cases like astrophotography"""
+        message_lower = message.lower()
+        
+        # Astrophotography cases - skip lighting unless user has lighting gear
+        astro_keywords = ['astrophotography', 'stars', 'milky way', 'night sky', 'astro']
+        if any(keyword in message_lower for keyword in astro_keywords):
+            return len(matched_gear.get('lighting', [])) == 0
+        
+        return False
+    
+    def _apply_special_case_triggers(self, content: str, message: str, matched_gear: Dict[str, List[GearItem]]) -> str:
+        """Apply special case triggers based on user message"""
+        message_lower = message.lower()
+        
+        # Group photography trigger
+        group_keywords = ['group', 'event', 'party', 'people', 'multiple people']
+        if any(keyword in message_lower for keyword in group_keywords):
+            content += "\n\n**Important for Groups:** When photographing groups of 3 or more, an aperture of f/2.8 may result in only part of the group being in focus, especially if people are on different planes. Suggest stopping down to f/4 or f/5.6 to keep multiple faces sharp, and adjust ISO or shutter speed accordingly to maintain exposure."
+        
+        # Astrophotography trigger
+        astro_keywords = ['astrophotography', 'stars', 'milky way', 'night sky', 'astro']
+        if any(keyword in message_lower for keyword in astro_keywords):
+            content += "\n\n**Astrophotography Notes:** Focus on exposure, tripod use, and mobile workflow. Use manual focus set to infinity, ISO 1600-6400, aperture f/2.8-f/4, and 15-30 second exposures depending on focal length (500 rule)."
+        
+        # Infrared triggers
+        if '590nm' in message_lower or '590 nm' in message_lower:
+            content += "\n\n**590nm Infrared:** This creates Aerochrome-style looks with red/gold foliage. Set custom white balance around 2500K and consider channel swapping in post-processing for dramatic color effects."
+        
+        if '720nm' in message_lower or '720 nm' in message_lower:
+            content += "\n\n**720nm Infrared:** This produces the traditional IR look with white foliage and dark skies. Set custom white balance around 3000K for best starting point."
+        
+        # Drone photography trigger
+        drone_keywords = ['drone', 'aerial', 'flying', 'dji', 'uav']
+        if any(keyword in message_lower for keyword in drone_keywords):
+            content += "\n\n**Drone Safety:** Recommend ND filters for smooth footage and slow pans for cinematic movement. ⚠️ **Important:** FAA rules regarding drone registration, Remote ID, and airspace limits vary by location. Users should consult faa.gov/uas or the B4UFLY app before flying."
+        
+        # Underwater trigger
+        if 'underwater' in message_lower:
+            content += "\n\n**Underwater Photography:** Use underwater housing, shoot in RAW, and consider red filters at depth. Manual white balance is crucial due to color loss underwater."
+        
+        return content
+    
+    def _handle_beginner_continuation(self, chat_session: ChatSession, matched_gear: Dict[str, List[GearItem]]) -> Dict[str, Any]:
         """Handle continuation to next step for beginners"""
         
         context = chat_session.conversation_context or {}
         if isinstance(context, str):
             context = {}
         photography_style = context.get('photography_style', '') if context else ''
+        skip_lighting = context.get('skip_lighting', False)
         
         if not photography_style:
             return {
@@ -174,19 +226,23 @@ class SynthiaChatEngine:
         next_step = current_step + 1
         
         if next_step == 2:
-            # Step 2: Lighting Setup
-            step2_content = beginner_steps.get('step2', {}).get('lighting_setup', '')
-            full_content = f"🟦 **Step 2: Lighting Setup**\n{step2_content}\n\nReady for Step 3: Posing & Composition?"
-            
-            return {
-                'content': full_content,
-                'step_number': 2,
-                'next_step': 2,
-                'awaiting_continuation': True,
-                'context': context
-            }
-            
-        elif next_step == 3:
+            # Step 2: Lighting Setup (or skip to posing if no lighting needed)
+            if skip_lighting:
+                next_step = 3  # Skip to step 3
+            else:
+                step2_content = beginner_steps.get('step2', {}).get('lighting_setup', '')
+                # Add mobile flash tip
+                step2_content += "\n\n**Mobile Flash Tip:** If you want to stay mobile, use handheld or on-camera flash with diffusers (e.g., MagMod Sphere). Start with flash power at 1/64 or 1/128 as a starting point. **Optional Color Balance Tip:** If you have an orange gel (½ CTO - Color Temperature Orange), place it over your flash to better match warm indoor lighting."
+                full_content = f"🟦 **Step 2: Lighting Setup**\n{step2_content}\n\nReady for Step 3: Posing & Composition?"
+                
+                return {
+                    'content': full_content,
+                    'step_number': 2,
+                    'next_step': 2,
+                    'awaiting_continuation': True
+                }
+        
+        if next_step == 3:
             # Step 3: Posing & Composition
             step3_content = beginner_steps.get('step3', {}).get('posing_composition', '')
             full_content = f"🟦 **Step 3: Posing & Composition**\n{step3_content}\n\nWant a final pro tip before you shoot?"
@@ -195,11 +251,10 @@ class SynthiaChatEngine:
                 'content': full_content,
                 'step_number': 3,
                 'next_step': 3,
-                'awaiting_continuation': True,
-                'context': context
+                'awaiting_continuation': True
             }
-            
-        elif next_step == 4:
+        
+        if next_step == 4:
             # Step 4: Final Pro Tip
             step4_content = beginner_steps.get('step4', {}).get('final_pro_tip', '')
             full_content = f"🟦 **Step 4: Final Pro Tip**\n{step4_content}\n\n📌 These tips should give you a solid foundation — but every shoot is different. Adjust on the fly, and trust your eye. If anything changes, I've got your back."
@@ -208,8 +263,7 @@ class SynthiaChatEngine:
                 'content': full_content,
                 'step_number': 4,
                 'next_step': 0,  # Reset for new conversation
-                'awaiting_continuation': False,
-                'context': {}
+                'awaiting_continuation': False
             }
         
         # Fallback

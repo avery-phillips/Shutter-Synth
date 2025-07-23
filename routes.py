@@ -7,6 +7,7 @@ import uuid
 import logging
 import os
 import time
+from collections import defaultdict
 
 # Configure upload settings
 UPLOAD_FOLDER = 'static/uploads'
@@ -22,6 +23,25 @@ app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
 
 # Initialize chat engine
 chat_engine = SynthiaChatEngine()
+
+# Simple rate limiting storage (in production, use Redis or similar)
+rate_limit_storage = defaultdict(list)
+
+def check_rate_limit(ip_address, limit=5, window_seconds=60):
+    """Simple rate limiting: 5 requests per 60 seconds per IP"""
+    now = time.time()
+    requests = rate_limit_storage[ip_address]
+    
+    # Remove old requests outside the window
+    requests[:] = [req_time for req_time in requests if now - req_time < window_seconds]
+    
+    # Check if limit exceeded
+    if len(requests) >= limit:
+        return False
+    
+    # Add current request
+    requests.append(now)
+    return True
 
 def allowed_file(filename):
     """Check if uploaded file has allowed extension"""
@@ -200,7 +220,15 @@ def chat():
 
 @app.route('/chat/send', methods=['POST'])
 def send_message():
-    """Handle chat message sending with optional file uploads"""
+    """Handle chat message submission with rate limiting"""
+    # Apply rate limiting
+    client_ip = request.environ.get('HTTP_X_FORWARDED_FOR', request.environ.get('REMOTE_ADDR', '127.0.0.1'))
+    if not check_rate_limit(client_ip):
+        return jsonify({
+            'error': 'Rate limit exceeded. Please wait before sending another message.',
+            'status': 'rate_limited'
+        }), 429
+    
     if 'user_id' not in session:
         return jsonify({'error': 'Not authenticated'}), 401
     

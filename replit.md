@@ -112,3 +112,13 @@ Preferred communication style: Simple, everyday language.
 - **Template Inheritance**: Consistent UI framework for easy maintenance and updates
 
 The application is designed to be easily deployable on platforms like Replit, Heroku, or similar cloud services, with minimal configuration required for basic functionality while supporting more robust database solutions for production use.
+
+## Recent System Updates (July 2024)
+
+### Enhanced Special Case Triggers & Mobile Optimization
+- **Advanced Special Case Handling**: Implemented comprehensive triggers for specialized photography scenarios including astrophotography (skip lighting for no-gear scenarios), infrared photography (590nm/720nm with specific settings), drone photography (with FAA safety warnings), underwater photography, and group photography (depth of field guidance for f/4-f/5.6)
+- **Enhanced Mobile Responsiveness**: Complete mobile-first redesign with touch-friendly 44px minimum button sizes, iOS-optimized input fields (16px font to prevent zoom), adaptive layouts for 768px and 480px breakpoints, and flexible button arrangements
+- **Improved Beginner Flow Control**: Enhanced step-by-step progression with smart lighting step skipping, mobile flash recommendations, color temperature orange gel tips, and strict one-step-at-a-time delivery to prevent overwhelming beginners
+- **Security & Rate Limiting**: Implemented IP-based rate limiting (5 requests per 60 seconds) on chat endpoints to prevent abuse and DoS attacks, with graceful error handling
+- **Enhanced Knowledge Base**: Updated photography guidance with manual white balance recommendations (~4000-4500K for mixed lighting), RAW shooting emphasis, and flexible starting point language throughout all responses
+- **Image Analysis Integration**: Full OpenAI GPT-4o vision integration supporting both inspiration analysis (how to recreate looks) and technique feedback (improve existing photos) with comprehensive lighting, composition, and gear-specific recommendations
