@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Get Started - Shutter Synth{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center py-5">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h3><i class="fas fa-user-plus"></i> Welcome to Shutter Synth</h3>
+                    <p class="text-muted mb-0">Let's get you set up with Synthia, your photography assistant</p>
+                </div>
+                
+                <div class="card-body">
+                    <form method="POST">
+                        <!-- Username -->
+                        <div class="mb-4">
+                            <label for="username" class="form-label">Choose a Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required
+                                   placeholder="Enter a unique username">
+                            <div class="form-text">This will be used to save your gear and preferences.</div>
+                        </div>
+
+                        <!-- Skill Level Selection -->
+                        <div class="mb-4">
+                            <label class="form-label">What's your photography skill level?</label>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="skill_level" id="beginner" value="Beginner" checked>
+                                <label class="form-check-label" for="beginner">
+                                    <strong>Beginner</strong>
+                                    <div class="text-muted small">I'm new to photography or want step-by-step guidance</div>
+                                    <div class="text-info small mt-1">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Synthia will guide you through setups in 4 clear steps, waiting for your confirmation between each step.
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="skill_level" id="intermediate" value="Intermediate">
+                                <label class="form-check-label" for="intermediate">
+                                    <strong>Intermediate</strong>
+                                    <div class="text-muted small">I have some experience and want comprehensive advice</div>
+                                    <div class="text-info small mt-1">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Synthia will provide detailed, all-in-one responses with complete setup information.
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="skill_level" id="advanced" value="Advanced">
+                                <label class="form-check-label" for="advanced">
+                                    <strong>Advanced</strong>
+                                    <div class="text-muted small">I'm experienced and want concise, technical guidance</div>
+                                    <div class="text-info small mt-1">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Synthia will give you comprehensive, technically-focused responses with minimal explanation.
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- What's Next -->
+                        <div class="alert alert-secondary">
+                            <h6><i class="fas fa-arrow-right"></i> What's Next?</h6>
+                            <p class="mb-0">After creating your profile, you'll input your photography gear so Synthia can provide personalized recommendations based on your actual equipment.</p>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-arrow-right"></i> Continue to Gear Setup
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Skill Level Comparison -->
+    <div class="row py-5">
+        <div class="col-12">
+            <h3 class="text-center mb-4">How Synthia Adapts to Your Level</h3>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-seedling"></i> Beginner</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li><i class="fas fa-check text-success"></i> Step-by-step guidance</li>
+                        <li><i class="fas fa-check text-success"></i> Detailed explanations</li>
+                        <li><i class="fas fa-check text-success"></i> Waits for your confirmation</li>
+                        <li><i class="fas fa-check text-success"></i> Safety tips and warnings</li>
+                        <li><i class="fas fa-check text-success"></i> Foundational concepts</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-tree"></i> Intermediate</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li><i class="fas fa-check text-success"></i> Comprehensive responses</li>
+                        <li><i class="fas fa-check text-success"></i> Technical details</li>
+                        <li><i class="fas fa-check text-success"></i> Creative suggestions</li>
+                        <li><i class="fas fa-check text-success"></i> Alternative approaches</li>
+                        <li><i class="fas fa-check text-success"></i> Pro tips included</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-mountain"></i> Advanced</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li><i class="fas fa-check text-success"></i> Concise, direct advice</li>
+                        <li><i class="fas fa-check text-success"></i> Advanced techniques</li>
+                        <li><i class="fas fa-check text-success"></i> Assumes prior knowledge</li>
+                        <li><i class="fas fa-check text-success"></i> Technical precision</li>
+                        <li><i class="fas fa-check text-success"></i> Professional workflows</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,454 @@
+{% extends "base.html" %}
+
+{% block title %}Gear Setup - Shutter Synth{% endblock %}
+
+{% block extra_head %}
+<style>
+.gear-section {
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+.gear-item {
+    background-color: var(--bs-secondary-bg);
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row py-4">
+        <div class="col-12">
+            <h2><i class="fas fa-cog"></i> Your Photography Gear</h2>
+            <p class="text-muted">Tell Synthia about your equipment so she can provide personalized recommendations based on what you actually own.</p>
+        </div>
+    </div>
+
+    <form method="POST" id="gearForm">
+        <!-- Camera Bodies -->
+        <div class="gear-section">
+            <h4><i class="fas fa-camera"></i> Camera Body</h4>
+            <p class="text-muted">Your primary camera body</p>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="camera_brand" class="form-label">Brand</label>
+                    <input type="text" class="form-control" id="camera_brand" name="camera_brand" 
+                           placeholder="e.g., Sony, Canon, Nikon"
+                           value="{% if existing_gear.camera_bodies %}{{ existing_gear.camera_bodies[0].brand }}{% endif %}">
+                </div>
+                <div class="col-md-6">
+                    <label for="camera_model" class="form-label">Model</label>
+                    <input type="text" class="form-control" id="camera_model" name="camera_model" 
+                           placeholder="e.g., A7IV, 5D Mark IV, Z6II"
+                           value="{% if existing_gear.camera_bodies %}{{ existing_gear.camera_bodies[0].model }}{% endif %}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Lenses -->
+        <div class="gear-section">
+            <h4><i class="fas fa-search"></i> Lenses</h4>
+            <p class="text-muted">Your available lenses</p>
+            
+            <div id="lenses-container">
+                {% if existing_gear.lenses %}
+                    {% for lens in existing_gear.lenses %}
+                    <div class="gear-item lens-item">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6>Lens {{ loop.index }}</h6>
+                            <button type="button" class="btn btn-outline-danger btn-sm remove-lens">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label">Brand</label>
+                                <input type="text" class="form-control" name="lens_brand_{{ loop.index0 }}" 
+                                       placeholder="Sony, Canon, etc." value="{{ lens.brand }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Model</label>
+                                <input type="text" class="form-control" name="lens_model_{{ loop.index0 }}" 
+                                       placeholder="24-70mm f/2.8" value="{{ lens.model }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Aperture Range</label>
+                                <input type="text" class="form-control" name="lens_aperture_{{ loop.index0 }}" 
+                                       placeholder="f/1.8, f/2.8-4" value="{{ lens.specifications.aperture_range if lens.specifications else '' }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Type</label>
+                                <select class="form-control" name="lens_type_{{ loop.index0 }}">
+                                    <option value="prime" {% if lens.specifications and lens.specifications.type == 'prime' %}selected{% endif %}>Prime</option>
+                                    <option value="zoom" {% if lens.specifications and lens.specifications.type == 'zoom' %}selected{% endif %}>Zoom</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="gear-item lens-item">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6>Lens 1</h6>
+                            <button type="button" class="btn btn-outline-danger btn-sm remove-lens">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label">Brand</label>
+                                <input type="text" class="form-control" name="lens_brand_0" placeholder="Sony, Canon, etc.">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Model</label>
+                                <input type="text" class="form-control" name="lens_model_0" placeholder="24-70mm f/2.8">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Aperture Range</label>
+                                <input type="text" class="form-control" name="lens_aperture_0" placeholder="f/1.8, f/2.8-4">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Type</label>
+                                <select class="form-control" name="lens_type_0">
+                                    <option value="prime">Prime</option>
+                                    <option value="zoom">Zoom</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <button type="button" class="btn btn-outline-primary" id="add-lens">
+                <i class="fas fa-plus"></i> Add Another Lens
+            </button>
+            <input type="hidden" name="lens_count" id="lens_count" value="{{ existing_gear.lenses|length if existing_gear.lenses else 1 }}">
+        </div>
+
+        <!-- Lighting Equipment -->
+        <div class="gear-section">
+            <h4><i class="fas fa-lightbulb"></i> Lighting & Modifiers</h4>
+            <p class="text-muted">Strobes, speedlights, continuous lights, softboxes, umbrellas, etc.</p>
+            
+            <div id="lighting-container">
+                {% if existing_gear.lighting %}
+                    {% for light in existing_gear.lighting %}
+                    <div class="gear-item lighting-item">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6>Light {{ loop.index }}</h6>
+                            <button type="button" class="btn btn-outline-danger btn-sm remove-lighting">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label">Brand</label>
+                                <input type="text" class="form-control" name="lighting_brand_{{ loop.index0 }}" 
+                                       placeholder="Godox, Profoto, etc." value="{{ light.brand }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Model</label>
+                                <input type="text" class="form-control" name="lighting_model_{{ loop.index0 }}" 
+                                       placeholder="AD200, 24inch softbox" value="{{ light.model }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Type</label>
+                                <input type="text" class="form-control" name="lighting_type_{{ loop.index0 }}" 
+                                       placeholder="Strobe, LED, etc." value="{{ light.specifications.type if light.specifications else '' }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Power</label>
+                                <input type="text" class="form-control" name="lighting_power_{{ loop.index0 }}" 
+                                       placeholder="200Ws, 50W" value="{{ light.specifications.power if light.specifications else '' }}">
+                            </div>
+                            <div class="col-md-1">
+                                <label class="form-label">Qty</label>
+                                <input type="number" class="form-control" name="lighting_quantity_{{ loop.index0 }}" 
+                                       value="{{ light.specifications.quantity if light.specifications else '1' }}" min="1">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <button type="button" class="btn btn-outline-primary" id="add-lighting">
+                <i class="fas fa-plus"></i> Add Lighting Equipment
+            </button>
+            <input type="hidden" name="lighting_count" id="lighting_count" value="{{ existing_gear.lighting|length if existing_gear.lighting else 0 }}">
+        </div>
+
+        <!-- Backdrops -->
+        <div class="gear-section">
+            <h4><i class="fas fa-image"></i> Backdrops & Backgrounds</h4>
+            <p class="text-muted">Paper rolls, fabric, vinyl, etc.</p>
+            
+            <div id="backdrops-container">
+                {% if existing_gear.backdrops %}
+                    {% for backdrop in existing_gear.backdrops %}
+                    <div class="gear-item backdrop-item">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6>Backdrop {{ loop.index }}</h6>
+                            <button type="button" class="btn btn-outline-danger btn-sm remove-backdrop">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Brand</label>
+                                <input type="text" class="form-control" name="backdrop_brand_{{ loop.index0 }}" 
+                                       placeholder="Savage, X-Drop, etc." value="{{ backdrop.brand }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Color/Type</label>
+                                <input type="text" class="form-control" name="backdrop_model_{{ loop.index0 }}" 
+                                       placeholder="Black Paper, Bright Red Vinyl" value="{{ backdrop.model }}">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <button type="button" class="btn btn-outline-primary" id="add-backdrop">
+                <i class="fas fa-plus"></i> Add Backdrop
+            </button>
+            <input type="hidden" name="backdrop_count" id="backdrop_count" value="{{ existing_gear.backdrops|length if existing_gear.backdrops else 0 }}">
+        </div>
+
+        <!-- Accessories -->
+        <div class="gear-section">
+            <h4><i class="fas fa-tools"></i> Other Accessories</h4>
+            <p class="text-muted">Reflectors, VFlats, tripods, atmosphere haze, etc.</p>
+            
+            <div id="accessories-container">
+                {% if existing_gear.accessories %}
+                    {% for accessory in existing_gear.accessories %}
+                    <div class="gear-item accessory-item">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6>Accessory {{ loop.index }}</h6>
+                            <button type="button" class="btn btn-outline-danger btn-sm remove-accessory">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Brand</label>
+                                <input type="text" class="form-control" name="accessory_brand_{{ loop.index0 }}" 
+                                       placeholder="Westcott, Manfrotto, etc." value="{{ accessory.brand }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Item</label>
+                                <input type="text" class="form-control" name="accessory_model_{{ loop.index0 }}" 
+                                       placeholder="Eyelighter 2, Carbon Fiber Tripod" value="{{ accessory.model }}">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <button type="button" class="btn btn-outline-primary" id="add-accessory">
+                <i class="fas fa-plus"></i> Add Accessory
+            </button>
+            <input type="hidden" name="accessory_count" id="accessory_count" value="{{ existing_gear.accessories|length if existing_gear.accessories else 0 }}">
+        </div>
+
+        <!-- Submit -->
+        <div class="row py-4">
+            <div class="col-12">
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save"></i> Save Gear & Start Chatting
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Lens management
+let lensCount = parseInt(document.getElementById('lens_count').value);
+
+document.getElementById('add-lens').addEventListener('click', function() {
+    const container = document.getElementById('lenses-container');
+    const newLens = document.createElement('div');
+    newLens.className = 'gear-item lens-item';
+    newLens.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6>Lens ${lensCount + 1}</h6>
+            <button type="button" class="btn btn-outline-danger btn-sm remove-lens">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <label class="form-label">Brand</label>
+                <input type="text" class="form-control" name="lens_brand_${lensCount}" placeholder="Sony, Canon, etc.">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Model</label>
+                <input type="text" class="form-control" name="lens_model_${lensCount}" placeholder="24-70mm f/2.8">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Aperture Range</label>
+                <input type="text" class="form-control" name="lens_aperture_${lensCount}" placeholder="f/1.8, f/2.8-4">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Type</label>
+                <select class="form-control" name="lens_type_${lensCount}">
+                    <option value="prime">Prime</option>
+                    <option value="zoom">Zoom</option>
+                </select>
+            </div>
+        </div>
+    `;
+    container.appendChild(newLens);
+    lensCount++;
+    document.getElementById('lens_count').value = lensCount;
+});
+
+// Remove lens functionality
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.remove-lens')) {
+        e.target.closest('.lens-item').remove();
+        lensCount = Math.max(0, lensCount - 1);
+        document.getElementById('lens_count').value = lensCount;
+    }
+});
+
+// Similar functionality for lighting, backdrops, and accessories
+let lightingCount = parseInt(document.getElementById('lighting_count').value);
+
+document.getElementById('add-lighting').addEventListener('click', function() {
+    const container = document.getElementById('lighting-container');
+    const newLighting = document.createElement('div');
+    newLighting.className = 'gear-item lighting-item';
+    newLighting.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6>Light ${lightingCount + 1}</h6>
+            <button type="button" class="btn btn-outline-danger btn-sm remove-lighting">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <label class="form-label">Brand</label>
+                <input type="text" class="form-control" name="lighting_brand_${lightingCount}" placeholder="Godox, Profoto, etc.">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Model</label>
+                <input type="text" class="form-control" name="lighting_model_${lightingCount}" placeholder="AD200, 24inch softbox">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Type</label>
+                <input type="text" class="form-control" name="lighting_type_${lightingCount}" placeholder="Strobe, LED, etc.">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Power</label>
+                <input type="text" class="form-control" name="lighting_power_${lightingCount}" placeholder="200Ws, 50W">
+            </div>
+            <div class="col-md-1">
+                <label class="form-label">Qty</label>
+                <input type="number" class="form-control" name="lighting_quantity_${lightingCount}" value="1" min="1">
+            </div>
+        </div>
+    `;
+    container.appendChild(newLighting);
+    lightingCount++;
+    document.getElementById('lighting_count').value = lightingCount;
+});
+
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.remove-lighting')) {
+        e.target.closest('.lighting-item').remove();
+        lightingCount = Math.max(0, lightingCount - 1);
+        document.getElementById('lighting_count').value = lightingCount;
+    }
+});
+
+// Backdrop management
+let backdropCount = parseInt(document.getElementById('backdrop_count').value);
+
+document.getElementById('add-backdrop').addEventListener('click', function() {
+    const container = document.getElementById('backdrops-container');
+    const newBackdrop = document.createElement('div');
+    newBackdrop.className = 'gear-item backdrop-item';
+    newBackdrop.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6>Backdrop ${backdropCount + 1}</h6>
+            <button type="button" class="btn btn-outline-danger btn-sm remove-backdrop">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <label class="form-label">Brand</label>
+                <input type="text" class="form-control" name="backdrop_brand_${backdropCount}" placeholder="Savage, X-Drop, etc.">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Color/Type</label>
+                <input type="text" class="form-control" name="backdrop_model_${backdropCount}" placeholder="Black Paper, Bright Red Vinyl">
+            </div>
+        </div>
+    `;
+    container.appendChild(newBackdrop);
+    backdropCount++;
+    document.getElementById('backdrop_count').value = backdropCount;
+});
+
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.remove-backdrop')) {
+        e.target.closest('.backdrop-item').remove();
+        backdropCount = Math.max(0, backdropCount - 1);
+        document.getElementById('backdrop_count').value = backdropCount;
+    }
+});
+
+// Accessory management
+let accessoryCount = parseInt(document.getElementById('accessory_count').value);
+
+document.getElementById('add-accessory').addEventListener('click', function() {
+    const container = document.getElementById('accessories-container');
+    const newAccessory = document.createElement('div');
+    newAccessory.className = 'gear-item accessory-item';
+    newAccessory.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6>Accessory ${accessoryCount + 1}</h6>
+            <button type="button" class="btn btn-outline-danger btn-sm remove-accessory">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <label class="form-label">Brand</label>
+                <input type="text" class="form-control" name="accessory_brand_${accessoryCount}" placeholder="Westcott, Manfrotto, etc.">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Item</label>
+                <input type="text" class="form-control" name="accessory_model_${accessoryCount}" placeholder="Eyelighter 2, Carbon Fiber Tripod">
+            </div>
+        </div>
+    `;
+    container.appendChild(newAccessory);
+    accessoryCount++;
+    document.getElementById('accessory_count').value = accessoryCount;
+});
+
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.remove-accessory')) {
+        e.target.closest('.accessory-item').remove();
+        accessoryCount = Math.max(0, accessoryCount - 1);
+        document.getElementById('accessory_count').value = accessoryCount;
+    }
+});
+</script>
+{% endblock %}

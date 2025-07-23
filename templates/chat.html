@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+{% block title %}Chat with Synthia - Shutter Synth{% endblock %}
+
+{% block extra_head %}
+<style>
+.chat-container {
+    height: 70vh;
+    overflow-y: auto;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    background-color: var(--bs-body-bg);
+}
+
+.message {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+.message.user {
+    background-color: var(--bs-primary-bg-subtle);
+    margin-left: 2rem;
+    text-align: right;
+}
+
+.message.bot {
+    background-color: var(--bs-secondary-bg);
+    margin-right: 2rem;
+}
+
+.message-header {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.message.user .message-header {
+    color: var(--bs-primary);
+}
+
+.message.bot .message-header {
+    color: var(--bs-success);
+}
+
+.message-content {
+    white-space: pre-wrap;
+    line-height: 1.6;
+}
+
+.typing-indicator {
+    display: none;
+    font-style: italic;
+    color: var(--bs-text-muted);
+}
+
+.step-indicator {
+    background-color: var(--bs-info-bg-subtle);
+    border-left: 4px solid var(--bs-info);
+    padding: 0.5rem 1rem;
+    margin: 1rem 0;
+    border-radius: 0.25rem;
+}
+
+.quick-suggestions {
+    margin-top: 1rem;
+}
+
+.quick-suggestions .btn {
+    margin: 0.25rem;
+    font-size: 0.9rem;
+}
+
+#messageInput {
+    resize: none;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row py-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h3><i class="fas fa-comments"></i> Chat with Synthia</h3>
+                    <p class="text-muted mb-0">Your photography shoot planning assistant</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('new_session') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-plus"></i> New Session
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Chat Messages -->
+            <div class="chat-container" id="chatContainer">
+                {% if not messages %}
+                <div class="message bot">
+                    <div class="message-header">
+                        <i class="fas fa-robot"></i> Synthia
+                    </div>
+                    <div class="message-content">Hi {{ user.username }}! I'm Synthia, your photography shoot planning assistant. 
+
+I'm here to help you create amazing shots using your gear and expertise. Since you're at the {{ user.skill_level }} level, {% if user.skill_level == 'Beginner' %}I'll guide you through setups step-by-step, waiting for your confirmation before moving to each next step.{% else %}I'll provide comprehensive responses with all the details you need in one go.{% endif %}
+
+What kind of shot are you looking to create today? Try asking me about:
+• "Dark and moody fashion portrait"
+• "High-key glamour headshot" 
+• "Natural outdoor portrait"
+• "Sports action photography"
+
+Or tell me about any specific look or vibe you're going for!</div>
+                </div>
+                {% else %}
+                    {% for message in messages %}
+                    <div class="message {{ message.message_type }}">
+                        <div class="message-header">
+                            {% if message.message_type == 'user' %}
+                                <i class="fas fa-user"></i> {{ user.username }}
+                            {% else %}
+                                <i class="fas fa-robot"></i> Synthia
+                                {% if message.step_number %}
+                                    <span class="badge bg-info ms-2">Step {{ message.step_number }}</span>
+                                {% endif %}
+                            {% endif %}
+                            <small class="text-muted ms-2">{{ message.timestamp.strftime('%I:%M %p') }}</small>
+                        </div>
+                        <div class="message-content">{{ message.content }}</div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+                
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="message bot">
+                        <div class="message-header">
+                            <i class="fas fa-robot"></i> Synthia
+                        </div>
+                        <div class="message-content">
+                            <i class="fas fa-ellipsis-h"></i> Synthia is thinking...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Suggestions -->
+            {% if user.skill_level == 'Beginner' %}
+            <div class="quick-suggestions">
+                <h6>Quick Responses:</h6>
+                <button type="button" class="btn btn-outline-success btn-sm quick-reply" data-message="yes">
+                    <i class="fas fa-check"></i> Yes, continue
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm quick-reply" data-message="no">
+                    <i class="fas fa-times"></i> No, I'm good
+                </button>
+            </div>
+            {% endif %}
+
+            <!-- Message Input -->
+            <div class="mt-3">
+                <form id="messageForm">
+                    <div class="input-group">
+                        <textarea class="form-control" id="messageInput" name="message" rows="2" 
+                                  placeholder="Ask Synthia about photography setups, techniques, or specific looks you want to achieve..."
+                                  required></textarea>
+                        <button class="btn btn-primary" type="submit" id="sendButton">
+                            <i class="fas fa-paper-plane"></i> Send
+                        </button>
+                    </div>
+                    <input type="hidden" id="sessionToken" value="{{ session_token }}">
+                </form>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6><i class="fas fa-info-circle"></i> Session Info</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>User:</strong> {{ user.username }}</p>
+                    <p><strong>Skill Level:</strong> 
+                        <span class="badge bg-{% if user.skill_level == 'Beginner' %}info{% elif user.skill_level == 'Intermediate' %}success{% else %}warning{% endif %}">
+                            {{ user.skill_level }}
+                        </span>
+                    </p>
+                    
+                    {% if user.skill_level == 'Beginner' %}
+                    <div class="alert alert-info">
+                        <small><i class="fas fa-lightbulb"></i> <strong>Tip:</strong> I'll guide you through setups step-by-step. Just say "yes" to continue to the next step, or "no" if you have everything you need.</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Photography Styles -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6><i class="fas fa-palette"></i> Photography Styles</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-1">
+                        <button class="btn btn-outline-secondary btn-sm quick-style" data-style="dark moody fashion portrait">
+                            Dark & Moody Fashion
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm quick-style" data-style="high-key glamour portrait">
+                            High-Key Glamour
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm quick-style" data-style="natural outdoor portrait">
+                            Natural Portrait
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm quick-style" data-style="sports action photography">
+                            Sports Action
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm quick-style" data-style="beauty headshot">
+                            Beauty Headshot
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gear Summary -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6><i class="fas fa-cog"></i> Your Gear</h6>
+                </div>
+                <div class="card-body">
+                    <small class="text-muted">Synthia knows about your equipment and will provide personalized recommendations.</small>
+                    <div class="mt-2">
+                        <a href="{{ url_for('gear_input') }}" class="btn btn-outline-primary btn-sm w-100">
+                            <i class="fas fa-edit"></i> Update Gear
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+{% endblock %}

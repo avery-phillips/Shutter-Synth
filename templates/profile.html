@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Shutter Synth{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row py-4">
+        <div class="col-lg-8 mx-auto">
+            <h2><i class="fas fa-user"></i> Your Profile</h2>
+            
+            <!-- User Info Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-id-card"></i> User Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Username:</strong> {{ user.username }}</p>
+                            <p><strong>Member Since:</strong> {{ user.created_at.strftime('%B %d, %Y') }}</p>
+                            <p><strong>Last Updated:</strong> {{ user.updated_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Current Skill Level:</strong> 
+                                <span class="badge bg-{% if user.skill_level == 'Beginner' %}info{% elif user.skill_level == 'Intermediate' %}success{% else %}warning{% endif %} fs-6">
+                                    {{ user.skill_level }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skill Level Update -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-level-up-alt"></i> Update Skill Level</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">As your photography skills improve, you can update your skill level to get different types of responses from Synthia.</p>
+                    
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Choose your skill level:</label>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="skill_level" id="beginner" value="Beginner" 
+                                       {% if user.skill_level == 'Beginner' %}checked{% endif %}>
+                                <label class="form-check-label" for="beginner">
+                                    <strong>Beginner</strong>
+                                    <div class="text-muted small">Step-by-step guidance with detailed explanations</div>
+                                    <div class="text-info small mt-1">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Synthia will guide you through setups in 4 clear steps, waiting for confirmation between each step.
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="skill_level" id="intermediate" value="Intermediate"
+                                       {% if user.skill_level == 'Intermediate' %}checked{% endif %}>
+                                <label class="form-check-label" for="intermediate">
+                                    <strong>Intermediate</strong>
+                                    <div class="text-muted small">Comprehensive advice with technical details</div>
+                                    <div class="text-info small mt-1">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Synthia will provide detailed, all-in-one responses with complete setup information.
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="skill_level" id="advanced" value="Advanced"
+                                       {% if user.skill_level == 'Advanced' %}checked{% endif %}>
+                                <label class="form-check-label" for="advanced">
+                                    <strong>Advanced</strong>
+                                    <div class="text-muted small">Concise, technical guidance</div>
+                                    <div class="text-info small mt-1">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Synthia will give you comprehensive, technically-focused responses with minimal explanation.
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Update Skill Level
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Gear Summary -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-cog"></i> Your Photography Gear</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <i class="fas fa-camera display-6 text-primary"></i>
+                                <h6 class="mt-2">Camera Bodies</h6>
+                                <span class="badge bg-secondary">{{ gear_summary.camera_bodies }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <i class="fas fa-search display-6 text-primary"></i>
+                                <h6 class="mt-2">Lenses</h6>
+                                <span class="badge bg-secondary">{{ gear_summary.lenses }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <i class="fas fa-lightbulb display-6 text-primary"></i>
+                                <h6 class="mt-2">Lighting</h6>
+                                <span class="badge bg-secondary">{{ gear_summary.lighting }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <i class="fas fa-image display-6 text-primary"></i>
+                                <h6 class="mt-2">Backdrops</h6>
+                                <span class="badge bg-secondary">{{ gear_summary.backdrops }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <i class="fas fa-tools display-6 text-primary"></i>
+                                <h6 class="mt-2">Accessories</h6>
+                                <span class="badge bg-secondary">{{ gear_summary.accessories }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <div class="mt-4">
+                                    <a href="{{ url_for('gear_input') }}" class="btn btn-outline-primary">
+                                        <i class="fas fa-edit"></i> Update Gear
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2 d-md-block">
+                        <a href="{{ url_for('chat') }}" class="btn btn-primary">
+                            <i class="fas fa-comments"></i> Continue Current Chat
+                        </a>
+                        <a href="{{ url_for('new_session') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-plus"></i> Start New Chat Session
+                        </a>
+                        <a href="{{ url_for('gear_input') }}" class="btn btn-outline-info">
+                            <i class="fas fa-cog"></i> Manage Gear
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,203 @@
+/* Custom CSS for Shutter Synth */
+
+/* Chat specific styles */
+.chat-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-container::-webkit-scrollbar-track {
+    background: var(--bs-secondary-bg);
+    border-radius: 4px;
+}
+
+.chat-container::-webkit-scrollbar-thumb {
+    background: var(--bs-border-color);
+    border-radius: 4px;
+}
+
+.chat-container::-webkit-scrollbar-thumb:hover {
+    background: var(--bs-secondary-color);
+}
+
+/* Message animations */
+.message {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Step indicators */
+.step-indicator {
+    font-size: 0.9rem;
+}
+
+/* Loading state */
+.loading {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+/* Gear form improvements */
+.gear-section {
+    transition: all 0.3s ease;
+}
+
+.gear-section:hover {
+    border-color: var(--bs-primary);
+}
+
+.gear-item {
+    transition: all 0.2s ease;
+}
+
+.gear-item:hover {
+    background-color: var(--bs-tertiary-bg);
+}
+
+/* Button improvements */
+.btn {
+    transition: all 0.2s ease;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .message.user {
+        margin-left: 1rem;
+    }
+    
+    .message.bot {
+        margin-right: 1rem;
+    }
+    
+    .chat-container {
+        height: 60vh;
+    }
+    
+    .navbar-brand small {
+        display: none;
+    }
+}
+
+/* Dark mode enhancements */
+[data-bs-theme=dark] .card {
+    border-color: var(--bs-border-color);
+}
+
+[data-bs-theme=dark] .form-control:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+/* Photography style quick buttons */
+.quick-style {
+    text-align: left;
+    font-size: 0.85rem;
+}
+
+.quick-style:hover {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: white;
+}
+
+/* Alert improvements */
+.alert {
+    border: none;
+    border-radius: 0.5rem;
+}
+
+/* Footer improvements */
+footer a {
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+footer a:hover {
+    color: var(--bs-primary) !important;
+}
+
+/* Form validation */
+.was-validated .form-control:valid {
+    border-color: var(--bs-success);
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='m2.3 6.73.94-.94 2.94 2.94-2.94-2.94-.94.94L1.36 5.8l.94-.94-.94-.94L2.3 2.98l.94.94.94-.94-.94-.94L2.3.16l-.94.94L.42 2.04l.94.94-.94.94.94.94z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.was-validated .form-control:invalid {
+    border-color: var(--bs-danger);
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 4.6 4.4 4.4M5.8 9 10.2 4.6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+/* Typography improvements */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+}
+
+.display-1, .display-2, .display-3, .display-4 {
+    font-weight: 700;
+}
+
+/* Icon spacing */
+.fas, .far, .fal, .fat, .fass, .fasr, .fasl, .fast {
+    margin-right: 0.5rem;
+}
+
+.btn .fas, .btn .far, .btn .fal, .btn .fat, .btn .fass, .btn .fasr, .btn .fasl, .btn .fast {
+    margin-right: 0.375rem;
+}
+
+/* Badge improvements */
+.badge {
+    font-weight: 500;
+}
+
+/* Card improvements */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid var(--bs-border-color);
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Animation utilities */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.slide-up {
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

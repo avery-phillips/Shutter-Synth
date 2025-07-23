@@ -1,0 +1,127 @@
+{
+  "high_key_portrait": {
+    "comprehensive": {
+      "setup": "Create a bright, airy portrait with minimal shadows and even lighting. Use a large, soft light source as your key light positioned at 45 degrees to your subject.",
+      "gear": "Use your [LENS] for flattering compression. [LIGHTING] with large softbox or umbrella. White or light gray backdrop recommended.",
+      "angles": "Shoot at subject's eye level or slightly above. Frame from chest up for headshots, or full body with plenty of negative space.",
+      "camera_settings": "Start with f/4-f/5.6, ISO 100-400, shutter 1/125s. Slightly overexpose by +1/3 to +2/3 stops. Use RAW format for maximum flexibility.",
+      "pro_tip": "Embrace the bright, clean aesthetic. Don't be afraid of losing some highlight detail for that perfect high-key look."
+    },
+    "beginner_steps": {
+      "step1": {
+        "summary": "High-key portrait with bright, clean aesthetic",
+        "scene_gear_overview": "**Location:** Indoor studio or bright outdoor shade\n**Visual Mood:** Bright, airy, minimal shadows\n**Recommended Lens:** [LENS] for flattering compression\n**Starting Camera Settings:**\n- ISO: 100-400 (keep noise minimal)\n- Aperture: f/4-f/5.6 (sharp focus with some depth)\n- Shutter Speed: 1/125s (sharp handheld shots)\n- **Manual White Balance:** ~5500K for daylight/flash balance\n- **Shoot RAW** for maximum post-processing flexibility\n\n*These are flexible starting points - adjust based on your specific conditions.*"
+      },
+      "step2": {
+        "lighting_setup": "**Key Light:** Position your [LIGHTING] with a large softbox at 45 degrees to your subject, slightly above eye level\n**Fill Light:** Use a reflector or second light at 50% power on the opposite side to minimize shadows\n**Background:** Aim one light at your backdrop to keep it bright and clean\n**Power Settings:** Start with your main light at 1/4 power, adjust up or down based on your desired exposure\n\n**Pro Lighting Tip:** The larger your light source relative to your subject, the softer the light will be."
+      },
+      "step3": {
+        "posing_composition": "**Posing:** Keep it simple - slight angle of the shoulders, chin slightly forward, soft expression\n**Framing:** Chest-up composition with plenty of negative space around the subject\n**Camera Height:** At subject's eye level or slightly above\n**Focus:** Sharp focus on the eyes, use single-point autofocus\n\n**Composition Tip:** Use the rule of thirds - place the subject's eyes along the upper third line."
+      },
+      "step4": {
+        "final_pro_tip": "**Final Pro Tip:** Don't be afraid to slightly overexpose by +1/3 to +2/3 stops to achieve that perfect high-key aesthetic. Your histogram might show some highlight clipping, but that's often desired for this style. Trust your eye over the camera's meter!"
+      }
+    },
+    "keywords": ["high-key", "bright", "clean", "portrait", "airy", "minimal shadows"]
+  },
+  "dark_moody_fashion": {
+    "comprehensive": {
+      "setup": "Create dramatic, low-key lighting with strong contrast and deep shadows. Use hard light sources and flags to control spill.",
+      "gear": "Use [LENS] for dramatic perspective. [LIGHTING] with barn doors or grids. Dark backdrop or location with character.",
+      "angles": "Experiment with dramatic angles - shoot from below for power, or from above for intimacy. Use strong geometric compositions.",
+      "camera_settings": "f/2.8-f/4, ISO 400-800, shutter 1/125s. Underexpose by -1/3 to -2/3 stops. Shoot RAW for shadow recovery.",
+      "pro_tip": "Embrace the shadows. Not every part of your subject needs to be lit - let darkness define the mood."
+    },
+    "beginner_steps": {
+      "step1": {
+        "summary": "Dark, moody fashion with dramatic contrast",
+        "scene_gear_overview": "**Location:** Indoor studio with dark walls or urban location with character\n**Visual Mood:** Dramatic, contrasty, mysterious\n**Recommended Lens:** [LENS] for impactful perspective\n**Starting Camera Settings:**\n- ISO: 400-800 (manageable noise for mood)\n- Aperture: f/2.8-f/4 (balance sharpness with selective focus)\n- Shutter Speed: 1/125s (sharp for fashion movement)\n- **Manual White Balance:** ~4000K for warmer, moodier tone\n- **Shoot RAW** for shadow detail recovery\n\n*Embrace slightly underexposed images - the darkness adds to the mood.*"
+      },
+      "step2": {
+        "lighting_setup": "**Key Light:** Position [LIGHTING] with a hard modifier (bare bulb or small softbox) at a steep angle to create dramatic shadows\n**Fill Light:** Use minimal fill - maybe just a small reflector to retain some shadow detail\n**Background:** Keep it dark - use black backdrop or let existing location fall into shadow\n**Flags/Gobos:** Use barn doors or flags to control light spill and create harder shadow edges\n\n**Mood Lighting Tip:** One strong light source often creates more drama than multiple lights."
+      },
+      "step3": {
+        "posing_composition": "**Posing:** Strong, confident poses - angular body positions, intense expressions\n**Framing:** Tight crops for intimacy or dramatic wide shots for environmental context\n**Camera Height:** Experiment with low angles for power or high angles for vulnerability\n**Focus:** Sharp focus on eyes or key fashion details\n\n**Drama Tip:** Use negative space and shadow to create mystery - not everything needs to be visible."
+      },
+      "step4": {
+        "final_pro_tip": "**Final Pro Tip:** Embrace the shadows and don't fight the darkness. Underexpose by -1/3 to -2/3 stops to maintain that moody aesthetic. In post-processing, lift shadows selectively rather than globally to maintain contrast and mood."
+      }
+    },
+    "keywords": ["dark", "moody", "fashion", "dramatic", "low-key", "shadows", "contrast"]
+  },
+  "natural_outdoor_portrait": {
+    "comprehensive": {
+      "setup": "Utilize natural light during golden hour or in open shade. Look for even, soft lighting that flatters skin tones.",
+      "gear": "Use [LENS] for natural perspective. Reflector for fill light. [LIGHTING] as accent or rim light if needed.",
+      "angles": "Shoot at eye level for connection. Use natural framing elements like trees, doorways, or architectural features.",
+      "camera_settings": "f/2.8-f/4, ISO 100-400, shutter 1/250s. Expose for skin tones. Use spot or center-weighted metering.",
+      "pro_tip": "Work with the natural light, not against it. Move your subject to find the most flattering light rather than forcing a difficult lighting situation."
+    },
+    "beginner_steps": {
+      "step1": {
+        "summary": "Natural outdoor portrait using available light",
+        "scene_gear_overview": "**Location:** Outdoor location with open shade or golden hour light\n**Visual Mood:** Natural, warm, authentic\n**Recommended Lens:** [LENS] for natural perspective and subject separation\n**Starting Camera Settings:**\n- ISO: 100-400 (clean image quality)\n- Aperture: f/2.8-f/4 (subject separation with sharp focus)\n- Shutter Speed: 1/250s (account for subject and photographer movement)\n- **Manual White Balance:** Daylight (~5500K) or Auto WB for natural tones\n- **Shoot RAW** for natural color grading flexibility\n\n*Golden hour (1 hour before sunset) provides the most flattering natural light.*"
+      },
+      "step2": {
+        "lighting_setup": "**Primary Light:** Use natural light as your main source - position subject in open shade or during golden hour\n**Fill Light:** Use a white or silver reflector to bounce light back into shadows\n**Accent Light:** If you have [LIGHTING], use it as a subtle rim light or hair light at low power\n**Direction:** Side lighting or backlighting creates more dimension than flat front lighting\n\n**Natural Light Tip:** If it's harsh sun, move your subject to open shade under trees or building overhangs for soft, even lighting."
+      },
+      "step3": {
+        "posing_composition": "**Posing:** Natural, relaxed poses - sitting on steps, leaning against walls, walking shots\n**Framing:** Use natural elements to frame your subject - branches, doorways, architectural features\n**Camera Height:** Eye level for connection, or slightly below for a more empowering angle\n**Focus:** Single point focus on the nearest eye\n\n**Environmental Tip:** Include elements of the location to tell a story, but don't let them distract from your subject."
+      },
+      "step4": {
+        "final_pro_tip": "**Final Pro Tip:** The best natural light happens quickly - be ready to shoot when you find it. Don't be afraid to move around and try different positions relative to the light source. Sometimes the most beautiful light lasts only minutes during golden hour."
+      }
+    },
+    "keywords": ["natural", "outdoor", "portrait", "golden hour", "available light", "environmental"]
+  },
+  "glamour_beauty": {
+    "comprehensive": {
+      "setup": "Create flawless, even lighting that minimizes texture and maximizes skin smoothness. Use large, soft light sources close to subject.",
+      "gear": "Use [LENS] for flattering compression. [LIGHTING] with beauty dish or large octabox. Ring light for even fill.",
+      "angles": "Shoot slightly above eye level. Focus on eyes, lips, and skin. Frame tightly for beauty shots.",
+      "camera_settings": "f/5.6-f/8 for sharpness, ISO 100-200, shutter 1/125s. Precise focus on eyes. Consider focus stacking for extreme detail.",
+      "pro_tip": "Perfect skin starts with perfect lighting. Invest time in getting your lighting setup right before worrying about post-processing."
+    },
+    "beginner_steps": {
+      "step1": {
+        "summary": "Glamour beauty photography with flawless lighting",
+        "scene_gear_overview": "**Location:** Controlled indoor studio environment\n**Visual Mood:** Polished, flawless, aspirational\n**Recommended Lens:** [LENS] for flattering compression and sharp detail\n**Starting Camera Settings:**\n- ISO: 100-200 (maximum image quality)\n- Aperture: f/5.6-f/8 (sharp detail across the face)\n- Shutter Speed: 1/125s (eliminate camera shake)\n- **Manual White Balance:** ~5000K for neutral skin tones\n- **Shoot RAW** for precise skin tone control\n\n*Focus is critical - use single point autofocus on the nearest eye.*"
+      },
+      "step2": {
+        "lighting_setup": "**Key Light:** Position [LIGHTING] with a beauty dish or large octabox directly in front and slightly above subject\n**Fill Light:** Use a large reflector below the subject's face to fill under-eye shadows\n**Hair Light:** Add a second light behind and above subject to separate hair from background\n**Background:** Clean, even lighting on backdrop - use separate background light\n\n**Beauty Lighting Tip:** The closer and larger your light source, the softer and more flattering it will be for skin."
+      },
+      "step3": {
+        "posing_composition": "**Posing:** Minimal, elegant poses - slight shoulder angles, chin forward slightly, relaxed expression\n**Framing:** Tight beauty shots focusing on face, or three-quarter length for full glamour\n**Camera Height:** Slightly above eye level to define jawline and minimize double chin\n**Focus:** Critical focus on the eyes - use single point autofocus and take multiple shots\n\n**Beauty Tip:** Small adjustments make big differences - coach your subject on subtle expression changes."
+      },
+      "step4": {
+        "final_pro_tip": "**Final Pro Tip:** Perfect glamour shots are often about what you don't see. Use precise lighting to minimize skin texture and create that flawless look in-camera. Remember: great skin starts with great lighting, not just retouching."
+      }
+    },
+    "keywords": ["glamour", "beauty", "flawless", "skin", "polished", "perfection"]
+  },
+  "sports_action": {
+    "comprehensive": {
+      "setup": "Freeze action with fast shutter speeds and predictive focusing. Position yourself to capture peak action moments.",
+      "gear": "Use [LENS] with fast autofocus. High ISO capability important. [LIGHTING] for indoor sports if permitted.",
+      "angles": "Get low for dynamic angles. Shoot from corners and sidelines. Anticipate action rather than reacting to it.",
+      "camera_settings": "f/2.8-f/4, ISO 800-3200, shutter 1/500s or faster. Continuous autofocus, burst mode, spot metering.",
+      "pro_tip": "Know the sport - understanding the flow of the game helps you anticipate and capture peak moments."
+    },
+    "beginner_steps": {
+      "step1": {
+        "summary": "Sports action photography with frozen motion",
+        "scene_gear_overview": "**Location:** Sports venue - field, court, track, or indoor facility\n**Visual Mood:** Dynamic, energetic, peak action\n**Recommended Lens:** [LENS] for reach and fast autofocus performance\n**Starting Camera Settings:**\n- ISO: 800-3200 (accept some noise for fast shutter speeds)\n- Aperture: f/2.8-f/4 (balance depth of field with shutter speed)\n- Shutter Speed: 1/500s or faster (freeze motion completely)\n- **Autofocus:** Continuous AF (AI Servo/AF-C) for moving subjects\n- **Shoot RAW** for noise reduction flexibility\n\n*Use burst mode - capture 5-10 frames per second during peak action.*"
+      },
+      "step2": {
+        "lighting_setup": "**Natural Light:** Outdoor sports - work with available sunlight, position for best light on subjects\n**Indoor Venue:** Use existing venue lighting - avoid flash if prohibited\n**Flash Setup:** If [LIGHTING] is allowed, use high-speed sync to freeze motion with fill flash\n**Direction:** Side lighting creates more dimension and drama than flat front lighting\n\n**Sports Lighting Tip:** Many venues prohibit flash, so be prepared to work with available light and higher ISOs."
+      },
+      "step3": {
+        "posing_composition": "**Positioning:** Get low for dynamic angles - shoot from knee level or even ground level\n**Framing:** Fill the frame with action - use longer focal lengths to get close to the action\n**Timing:** Anticipate peak moments - the moment before contact, at the height of a jump\n**Focus:** Use single point or zone autofocus on the primary subject\n\n**Action Tip:** Follow the ball or puck - that's usually where the most dramatic action happens."
+      },
+      "step4": {
+        "final_pro_tip": "**Final Pro Tip:** Study the sport before shooting. Understanding the rhythm and flow helps you anticipate great moments. Don't just react to action - predict where it's going to be. The best sports shots capture emotion and peak action together."
+      }
+    },
+    "keywords": ["sports", "action", "fast", "motion", "athletic", "dynamic", "freeze"]
+  }
+}
