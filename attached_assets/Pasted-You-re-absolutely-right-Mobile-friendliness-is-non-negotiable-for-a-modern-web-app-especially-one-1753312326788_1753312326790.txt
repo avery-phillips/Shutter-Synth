@@ -1,0 +1,161 @@
+You're absolutely right\! Mobile-friendliness is non-negotiable for a modern web app, especially one you expect users to interact with on their phones. It falls under the umbrella of user experience and accessibility, which are crucial for adoption.
+
+I'll add a clear directive for **responsive design** to the "User Interface (Basic)" section of the prompt. This will instruct the Replit Agent to use techniques (like CSS media queries, flexible layouts, and touch-friendly elements) that ensure the app looks and functions well on various screen sizes, particularly mobile phones.
+
+Here's the updated prompt with the mobile-friendly instruction:
+
+-----
+
+````
+You are a Replit Agent tasked with creating a robust, secure, and scalable web-based chatbot application called "Shutter Synth". This chatbot will specialize in photography advice across Fashion, Portrait, Sports, Glamour, Boudoir, and Headshot genres. Its primary function is to provide customized photography setup, gear, angle, and camera setting recommendations based on a user's specific equipment and their chosen skill level.
+
+A key feature of "Shutter Synth" is its ability to adapt its response style based on the user's selected skill level (Beginner, Intermediate, Advanced), providing a tailored, user-friendly experience. The chatbot's persona will be **Synthia**.
+
+**I. Core Principles (Prioritize these throughout the build):**
+* **Prioritize security by design and build for future scalability.**
+* **Adhere to the principle of 'least privilege' for all access controls.**
+* **Assume all external input is potentially malicious.**
+
+**II. Project Setup:**
+   * Create a Python Flask web application.
+   * Set up a virtual environment and include necessary dependencies (e.g., `Flask`, `SQLAlchemy` for easier database interaction, or just `sqlite3` directly).
+   * Structure the project with clear directories for templates, static files, and application logic.
+
+**III. User Onboarding & Profile Management:**
+   * **User System (basic & secure):** Implement a simple user system. For the initial version, focus on securely linking user data to a unique user identifier (e.g., session-based or simple text field for name). Ensure user data (especially skill level and gear) is securely associated. Advise on best practices for full user authentication (e.g., password hashing with bcrypt) if implementing later.
+   * **Skill Level Selection:** During initial onboarding, prompt the user to select their skill level: "Beginner," "Intermediate," or "Advanced." Store this with their user profile.
+   * **Gear Input:** Develop an interactive and guided form for users to input their photography equipment. The form should allow for:
+        * **Camera Bodies:** Brand (e.g., Sony), Model (e.g., A7IV)
+        * **Lenses:** Brand (e.g., Sony), Model (e.g., 85mm 1.8), Aperture Range (e.g., f/1.8, f/2.8-4), Prime/Zoom.
+        * **Lighting & Modifiers:** Type (e.g., Godox Ad200, Magmod 24inch softbox with grid, Westcott Eyelighter 2), Quantity, specific characteristics (e.g., size for softboxes, power for lights).
+        * **Backdrops:** Color/Type (e.g., Savage Black backdrop, Xdrop Bright Red).
+        * **Other Accessories:** (e.g., Reflectors, VFlats, Atmosphere Haze, Tripods).
+   * **Data Storage (Secure & Efficient):** Store each user's skill level and detailed gear list in a SQLite database (`users.db`). The schema should be flexible enough to accommodate various types of gear and be linked to a user ID. Design the schema to be optimized for efficient read and write performance, particularly for user gear and chat history. Ensure common query fields (like user ID) are indexed.
+   * **Profile Settings:** Implement a feature (a separate page/route) allowing logged-in users to **adjust their skill level** (e.g., from Beginner to Intermediate) at any time, updating their `users.db` entry.
+
+**IV. Chatbot Core Logic & Adaptive Responses (Synthia Persona):**
+   * **Persona:** The chatbot is **Synthia**, the photography shoot planning assistant inside Shutter Synth. Her job is to help users plan creative photography setups based on their gear, lighting tools, location, and goals. Synthia speaks like a helpful, confident studio assistant — calm, direct, and technically sharp.
+   * **User Input Processing (Validated):** Accept natural language text input from the user describing the "look" or "vibe" they want to achieve (e.g., "I want to shoot a dark and moody fashion portrait," "How do I get a high-key glamour shot?"). **Implement comprehensive server-side input validation and sanitization for all user inputs (e.g., skill level, gear details, chat messages) to prevent XSS, SQL injection, and ensure data integrity. Specify reasonable validation rules (e.g., string lengths, expected data types).**
+   * **Knowledge Base:** Implement a robust system to store and retrieve photography knowledge. This can be a structured JSON file (`photography_knowledge.json`) or directly within the database. This knowledge base must be designed to provide information for:
+        * **Comprehensive Responses (Intermediate/Advanced):** All setup, gear, angles, and camera settings delivered in a single, well-structured output.
+        * **Step-by-Step Responses (Beginner):** Information broken down into 4 distinct steps: "Scene & Gear Overview," "Lighting Setup," "Posing & Composition," and "Final Pro Tip."
+   * **Recommendation Generation Logic:**
+        * **Gear Matching:** Based on the user's stored equipment, filter and suggest *only* the relevant gear from their list that matches the requirements for the requested "look."
+        * **Skill Level Adaptive Output:**
+            * **If User Skill is 'Beginner':**
+                * **Always follow this format:**
+                    * Start with an "Intake Summary" based on user input.
+                    * Then deliver responses in 4 steps, one at a time:
+                        * 🟦 Step 1: Scene & Gear Overview
+                        * 🟦 Step 2: Lighting Setup
+                        * 🟦 Step 3: Posing & Composition
+                        * 🟦 Step 4: Final Pro Tip
+                    * After each step, ask if the user would like to continue. Only proceed if they say yes or give a clear signal.
+                    * If the user says “no,” “I’m good,” or declines further help, end politely: "Got it. If anything changes, I’m here when you need me. Good luck with the shoot!"
+                * **Loop Protection:**
+                    * Never repeat the Intake Summary or any previous steps unless the user explicitly asks. Once a step is complete, treat it as locked.
+                    * Never summarize or compress all 4 steps into one reply — deliver each step only when prompted.
+                    * If the user says “yes,” always resume from the **next numbered step**, not from the beginning.
+                    * **Never combine Step 3 and Step 4 in a single reply. Each step must be sent independently.**
+                    * **NEVER repeat Step 1 after it has been delivered.** If the user says "yes" after Step 1, **immediately continue to Step 2 only**. Step transitions must strictly follow the one-step-at-a-time format.
+                * **Special Case Triggers:**
+                    * If the user mentions "Astrophotography," "stars," "Milky Way," "night sky": Skip Step 2 unless the user lists lighting gear. Focus on exposure, tripod use, and mobile workflow.
+                    * If "590nm infrared": Describe Aerochrome-style looks (red/gold foliage), custom white balance, and channel swapping.
+                    * If "720nm infrared": Mention white foliage and dark skies, the traditional IR look.
+                    * If "Drone," "aerial," or "flying": Recommend safe camera techniques (ND filters, slow pans). ⚠️ Include this disclaimer: "FAA rules regarding drone registration, Remote ID, and airspace limits vary by location. Users should consult faa.gov/uas or the B4UFLY app before flying."
+                    * If "Underwater," "macro," "concert," "cinemagraph," "360," etc.: Retrieve guidance from the knowledge base for accurate gear and workflow suggestions for these specific genres.
+                * **Group & Event Triggers:** If "event," "party," or "group" photography:
+                    * In Step 1, mention that when photographing **groups of 3 or more**, an aperture of **f/2.8 may result in only part of the group being in focus**, especially if people are on different planes.
+                    * Suggest stopping down to **f/4 or f/5.6** to keep multiple faces sharp, and adjust ISO or shutter speed accordingly to maintain exposure.
+                * **Step 1: Scene & Gear Overview:** Summarize location type, lighting conditions, and visual mood. Recommend lens(es) from user's gear. List lighting modifiers or props if provided. Suggest starting camera settings: ISO, Aperture, Shutter Speed, Picture Profile (if relevant), **Manual White Balance (~4000–4500K for mixed light)**, **Shoot RAW for maximum flexibility**. Make it clear all settings are suggested as flexible **starting points**, not strict rules. Encourage users to adjust based on real-time conditions. End with: "Would you like help planning your lighting next?" (If no artificial lighting for genre, skip/clarify it's not needed).
+                * **Step 2: Lighting Setup:** Describe light positions (key, fill, rim) using clear placement cues. Mention relative power tips. If outdoors: suggest bounce cards, white boards, diffusers. If indoors: suggest flagging reflections, managing shadows. **If the user wants to stay mobile:** Recommend handheld or on-camera flash. Use diffusers (e.g., MagMod Sphere or any dome-shaped attachment) for softer output. Suggest starting flash power at **1/64 or 1/128**, and clearly note this is a starting point. **Optional Color Balance Tip:** "If you happen to have an orange gel (called a **½ CTO — Color Temperature Orange**), you can place it over your flash to better match the warm indoor lighting. Totally optional — it just helps your flash blend in more naturally with the room’s color." Emphasize guidance is a starting framework. End with: "Ready to move on to posing and composition?"
+                * **Step 3: Posing & Composition:** Suggest 1–2 natural poses (for people) or angles (for product/scene). Recommend lens framing, crop type, or eye level/camera height. Tailor suggestions to match the gear and artistic style. Encourage use of ambient features (e.g., windows, doorways). Remind users these are starter poses or angles. End with: "Want a final pro tip before you shoot?"
+                * **Step 4: Final Pro Tip:** Offer one sharp recommendation (e.g., Frame with leading lines/foliage, Use haze/atmosphere, Feather light, Embrace ambient warmth/use flash only to clean up shadows, Set multiple custom white balances). Wrap with: "📌 These tips should give you a solid foundation — but every shoot is different. Adjust on the fly, and trust your eye. If anything changes, I’ve got your back."
+            * **If User Skill is 'Intermediate' or 'Advanced':**
+                * Provide a single, comprehensive response with all "Setup," "Gear," "Angles," and "Camera Settings" details. The depth of explanation should implicitly match the chosen skill level (more direct for advanced, slightly more explanation for intermediate). Synthia's tone remains consistent.
+   * **Response Handling (Scalable):** The Flask app needs to manage the state of the conversation for beginner users (i.e., which step they are on, and the previous context) using server-side session variables or database flags rather than complex long-lived server processes, to facilitate potential future horizontal scaling.
+   * **API Security (Rate Limiting):** All API endpoints for user interaction (e.g., submitting gear, sending chat messages) must be secured. Implement basic rate limiting on critical endpoints (e.g., chat message submission) to prevent abuse and denial-of-service attempts. Specify reasonable rate limits (e.g., 5 requests per 10 seconds per user IP or session).
+   * **Asynchronous Operations (Future-Proofing):** For any potentially long-running or computationally intensive tasks (e.g., very complex future prompt processing, although simple keyword matching is fine for MVP), propose how an asynchronous processing strategy (e.g., using background threads for Python) could be integrated to prevent blocking the main application thread and improve user experience responsiveness.
+
+**V. User Interface (Basic & Mobile-Friendly):**
+   * **Design all web pages to be responsive and optimized for mobile phone usage.** This includes using appropriate HTML5, CSS for fluid layouts, flexible images, and media queries to adapt to various screen sizes.
+   * **Home Page:** A simple welcome page.
+   * **Onboarding/Gear Input Page:** HTML form for gear input and skill selection.
+   * **Chat Interface:** A simple chat window where users can type their requests and see responses. This interface needs to be able to display the step-by-step output for beginners and manage user "yes/no" responses (e.g., by sending subsequent clicks/inputs to the server).
+   * **Profile Page:** A simple page to view/edit user's skill level and perhaps their gear list.
+
+**VI. Initial Photography Knowledge Data (for `photography_knowledge.json` or similar):**
+   * Pre-populate with at least 3-5 distinct "looks" or scenarios relevant to the specified genres (Fashion, Portrait, Sports, Glamour, Boudoir, Headshot).
+   * For each scenario, define the comprehensive advice (for Intermediate/Advanced users) AND structure the advice into the 4 steps required for Beginner users, ensuring all special case triggers are considered if applicable.
+   * Example structure for `photography_knowledge.json`:
+     ```json
+     {
+       "high_key_portrait": {
+         "comprehensive": {
+           "setup": "...",
+           "gear": "...",
+           "angles": "...",
+           "camera_settings": "..."
+         },
+         "beginner_steps": {
+           "step1": {
+             "summary": "...",
+             "scene_gear_overview": "..."
+           },
+           "step2": {
+             "lighting_setup": "..."
+           },
+           "step3": {
+             "posing_composition": "..."
+           },
+           "step4": {
+             "final_pro_tip": "..."
+           }
+         },
+         "keywords": ["high-key", "bright", "clean", "portrait"]
+       },
+       "dark_moody_fashion": {
+         "comprehensive": {
+           "setup": "...",
+           "gear": "...",
+           "angles": "...",
+           "camera_settings": "..."
+         },
+         "beginner_steps": {
+           "step1": {
+             "summary": "...",
+             "scene_gear_overview": "..."
+           },
+           "step2": {
+             "lighting_setup": "..."
+           },
+           "step3": {
+             "posing_composition": "..."
+           },
+           "step4": {
+             "final_pro_tip": "..."
+           }
+         },
+         "keywords": ["dark", "moody", "fashion", "dramatic"]
+       }
+       // ... additional scenarios including Astrophotography, Infrared, Group Shots etc.
+     }
+     ```
+
+**VII. General Development Practices (Security & Scalability Focused):**
+   * **Secure Handling of Sensitive Data & Secrets:** All sensitive configurations or potential future API keys must be stored as Replit Secrets (environment variables) and accessed only from the server-side code. Never hardcode secrets in the codebase or expose them in client-side applications.
+   * **Robust Error Handling & Logging:** Implement graceful error handling across the application. User-facing error messages should be generic and informative without revealing sensitive internal details (e.g., database errors, file paths). Ensure detailed error logs are generated on the server-side (and stored securely, not publicly accessible) for debugging and performance monitoring.
+   * **Dependency Management & Security Updates:** Include a clear `requirements.txt` listing all third-party libraries. Add a comment reminding the developer to regularly review and update dependencies to patch security vulnerabilities and ensure compatibility.
+   * **Modular Codebase:** Develop a modular and well-organized codebase with clear separation of concerns (e.g., distinct modules for API routes, database interactions, business logic, Synthia's chat logic, utility functions). This structure should facilitate future scaling, maintenance, and debugging.
+
+**Constraint:** Focus on the core functionality as described, especially the adaptive response logic based on user skill and the fundamental security/scalability measures. Keep the UI functional. Prioritize clear logic for matching user intent to the pre-defined knowledge base and user gear.
+
+**Deliverables:**
+* A `main.py` (or equivalent) Flask application with clear routing and logic for handling user sessions, gear input, skill level changes, and chatbot interactions.
+* HTML templates for the user interface (onboarding, chat, profile).
+* A `users.db` SQLite database with a schema that stores user IDs, skill levels, and detailed gear lists.
+* A `photography_knowledge.json` (or similar data structure) pre-populated with initial photography advice, structured to support both comprehensive and step-by-step responses.
+* A `requirements.txt` file listing all Python dependencies.
+
+---
+````
