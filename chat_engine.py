@@ -32,8 +32,8 @@ class SynthiaChatEngine:
         if uploaded_images:
             return self._handle_image_analysis(message, skill_level, user_gear, uploaded_images)
         
-        # Parse user input and detect intent
-        intent = self._classify_intent(message)
+        # Get current conversation context
+        current_scenario = self._get_current_scenario(chat_session)
         
         # Handle continuation responses for beginners
         if skill_level == 'Beginner' and self._is_continuation_response(message):
@@ -43,10 +43,16 @@ class SynthiaChatEngine:
         if skill_level == 'Beginner' and self._is_decline_response(message):
             return self._handle_decline_response()
         
+        # Check if this is a follow-up question to existing context
+        if current_scenario and self._is_followup_question(message):
+            return self._handle_followup_question(message, current_scenario, skill_level, user_gear, chat_session)
+        
         # Generate new response based on photography request
         photography_style = self._extract_photography_style(message)
         
         if photography_style:
+            # Store new scenario in context
+            self._set_current_scenario(chat_session, photography_style)
             matched_gear = self._match_user_gear(user_gear, photography_style)
             
             if skill_level == 'Beginner':
@@ -55,6 +61,82 @@ class SynthiaChatEngine:
                 return self._generate_comprehensive_response(photography_style, matched_gear, skill_level, message)
         else:
             return self._generate_general_response(message, skill_level)
+    
+    def _get_current_scenario(self, chat_session: ChatSession) -> Optional[str]:
+        """Get the current conversation scenario from session context"""
+        if chat_session.conversation_context:
+            return chat_session.conversation_context.get('current_scenario')
+        return None
+    
+    def _set_current_scenario(self, chat_session: ChatSession, scenario: str):
+        """Set the current conversation scenario in session context"""
+        if not chat_session.conversation_context:
+            chat_session.conversation_context = {}
+        chat_session.conversation_context['current_scenario'] = scenario
+    
+    def _is_followup_question(self, message: str) -> bool:
+        """Check if message is a follow-up question to existing context"""
+        message_lower = message.lower()
+        
+        # Follow-up keywords that suggest building on existing context
+        followup_keywords = [
+            'posing', 'pose', 'poses', 'positioning',
+            'lighting', 'light', 'lights', 'illumination',
+            'gear', 'equipment', 'lens', 'camera',
+            'settings', 'exposure', 'aperture', 'iso', 'shutter',
+            'angles', 'composition', 'framing',
+            'tips', 'advice', 'suggestions', 'help',
+            'how to', 'what about', 'any', 'also',
+            'more', 'additional', 'other', 'different'
+        ]
+        
+        # Check for follow-up patterns
+        for keyword in followup_keywords:
+            if keyword in message_lower:
+                return True
+        
+        # Question patterns that suggest follow-ups
+        question_patterns = [
+            'any suggestions', 'what about', 'how about', 'can you',
+            'do you have', 'what would', 'how do i', 'how should i'
+        ]
+        
+        for pattern in question_patterns:
+            if pattern in message_lower:
+                return True
+        
+        return False
+    
+    def _handle_followup_question(self, message: str, current_scenario: str, skill_level: str, 
+                                 user_gear: List[GearItem], chat_session: ChatSession) -> Dict[str, Any]:
+        """Handle follow-up questions within existing scenario context"""
+        message_lower = message.lower()
+        
+        # Get the scenario data
+        scenario_data = self.knowledge_base.get(current_scenario, {})
+        if not scenario_data:
+            # Fallback to general response if scenario not found
+            return self._generate_general_response(message, skill_level)
+        
+        # Determine what aspect they're asking about
+        if any(word in message_lower for word in ['posing', 'pose', 'poses', 'positioning']):
+            return self._generate_posing_advice(current_scenario, scenario_data, skill_level, user_gear)
+        
+        elif any(word in message_lower for word in ['lighting', 'light', 'lights', 'illumination']):
+            return self._generate_lighting_advice(current_scenario, scenario_data, skill_level, user_gear)
+        
+        elif any(word in message_lower for word in ['gear', 'equipment', 'lens', 'camera']):
+            return self._generate_gear_advice(current_scenario, scenario_data, skill_level, user_gear)
+        
+        elif any(word in message_lower for word in ['settings', 'exposure', 'aperture', 'iso', 'shutter']):
+            return self._generate_settings_advice(current_scenario, scenario_data, skill_level)
+        
+        elif any(word in message_lower for word in ['angles', 'composition', 'framing']):
+            return self._generate_composition_advice(current_scenario, scenario_data, skill_level)
+        
+        else:
+            # General follow-up - provide additional tips or clarification
+            return self._generate_general_followup(current_scenario, scenario_data, skill_level, message)
     
     def _classify_intent(self, message: str) -> str:
         """Classify the user's intent from their message"""
@@ -120,6 +202,155 @@ class SynthiaChatEngine:
                 matched_gear['accessories'].append(gear)
         
         return matched_gear
+    
+    def _generate_posing_advice(self, scenario: str, scenario_data: Dict[str, Any], skill_level: str, user_gear: List[GearItem]) -> Dict[str, Any]:
+        """Generate posing advice for current scenario"""
+        comprehensive_data = scenario_data.get('comprehensive', {})
+        
+        # Extract posing/composition guidance
+        angles_info = comprehensive_data.get('angles', '')
+        
+        # Add scenario-specific posing tips
+        posing_tips = self._get_posing_tips_for_scenario(scenario)
+        
+        content = f"**Posing & Composition for {scenario.replace('_', ' ').title()}:**\n\n"
+        content += f"{angles_info}\n\n"
+        content += f"**Additional Posing Tips:**\n{posing_tips}"
+        
+        return {
+            'content': content,
+            'step_number': None,
+            'next_step': 0,
+            'awaiting_continuation': False,
+            'context': {'current_scenario': scenario}
+        }
+    
+    def _generate_lighting_advice(self, scenario: str, scenario_data: Dict[str, Any], skill_level: str, user_gear: List[GearItem]) -> Dict[str, Any]:
+        """Generate lighting advice for current scenario"""
+        comprehensive_data = scenario_data.get('comprehensive', {})
+        setup_info = comprehensive_data.get('setup', '')
+        
+        # Filter for lighting-specific content
+        lighting_content = self._extract_lighting_content(setup_info)
+        matched_gear = self._match_user_gear(user_gear, scenario)
+        lighting_gear = self._personalize_gear_recommendations("Use your lighting equipment for ", matched_gear)
+        
+        content = f"**Lighting Setup for {scenario.replace('_', ' ').title()}:**\n\n"
+        content += f"{lighting_content}\n\n"
+        content += f"**Your Lighting Gear:** {lighting_gear}"
+        
+        return {
+            'content': content,
+            'step_number': None,
+            'next_step': 0,
+            'awaiting_continuation': False,
+            'context': {'current_scenario': scenario}
+        }
+    
+    def _generate_gear_advice(self, scenario: str, scenario_data: Dict[str, Any], skill_level: str, user_gear: List[GearItem]) -> Dict[str, Any]:
+        """Generate gear advice for current scenario"""
+        comprehensive_data = scenario_data.get('comprehensive', {})
+        gear_info = comprehensive_data.get('gear', '')
+        
+        matched_gear = self._match_user_gear(user_gear, scenario)
+        personalized_gear = self._personalize_gear_recommendations(gear_info, matched_gear)
+        
+        content = f"**Recommended Gear for {scenario.replace('_', ' ').title()}:**\n\n"
+        content += f"{personalized_gear}\n\n"
+        content += "**From Your Collection:** "
+        
+        gear_summary = []
+        if matched_gear['cameras']:
+            gear_summary.append(f"Camera: {matched_gear['cameras'][0].brand} {matched_gear['cameras'][0].model}")
+        if matched_gear['lenses']:
+            gear_summary.append(f"Lens: {matched_gear['lenses'][0].brand} {matched_gear['lenses'][0].model}")
+        if matched_gear['lighting']:
+            gear_summary.append(f"Lighting: {len(matched_gear['lighting'])} item(s)")
+        
+        content += " • ".join(gear_summary) if gear_summary else "Add your gear in the profile for personalized recommendations"
+        
+        return {
+            'content': content,
+            'step_number': None,
+            'next_step': 0,
+            'awaiting_continuation': False,
+            'context': {'current_scenario': scenario}
+        }
+    
+    def _generate_settings_advice(self, scenario: str, scenario_data: Dict[str, Any], skill_level: str) -> Dict[str, Any]:
+        """Generate camera settings advice for current scenario"""
+        comprehensive_data = scenario_data.get('comprehensive', {})
+        camera_settings = comprehensive_data.get('camera_settings', '')
+        
+        content = f"**Camera Settings for {scenario.replace('_', ' ').title()}:**\n\n"
+        content += f"{camera_settings}\n\n"
+        content += "**Remember:** These are starting points - adjust based on your specific lighting conditions and creative vision."
+        
+        return {
+            'content': content,
+            'step_number': None,
+            'next_step': 0,
+            'awaiting_continuation': False,
+            'context': {'current_scenario': scenario}
+        }
+    
+    def _generate_composition_advice(self, scenario: str, scenario_data: Dict[str, Any], skill_level: str) -> Dict[str, Any]:
+        """Generate composition advice for current scenario"""
+        comprehensive_data = scenario_data.get('comprehensive', {})
+        angles_info = comprehensive_data.get('angles', '')
+        
+        content = f"**Composition & Angles for {scenario.replace('_', ' ').title()}:**\n\n"
+        content += f"{angles_info}\n\n"
+        content += "**Pro Tip:** Try multiple angles and compositions during your shoot - you can always narrow down to the best shots later."
+        
+        return {
+            'content': content,
+            'step_number': None,
+            'next_step': 0,
+            'awaiting_continuation': False,
+            'context': {'current_scenario': scenario}
+        }
+    
+    def _generate_general_followup(self, scenario: str, scenario_data: Dict[str, Any], skill_level: str, message: str) -> Dict[str, Any]:
+        """Generate general follow-up advice for current scenario"""
+        comprehensive_data = scenario_data.get('comprehensive', {})
+        pro_tip = comprehensive_data.get('pro_tip', '')
+        
+        content = f"**Additional Tips for {scenario.replace('_', ' ').title()}:**\n\n"
+        content += f"{pro_tip}\n\n"
+        content += "Feel free to ask about specific aspects like posing, lighting, gear, or camera settings for more detailed guidance!"
+        
+        return {
+            'content': content,
+            'step_number': None,
+            'next_step': 0,
+            'awaiting_continuation': False,
+            'context': {'current_scenario': scenario}
+        }
+    
+    def _get_posing_tips_for_scenario(self, scenario: str) -> str:
+        """Get scenario-specific posing tips"""
+        posing_tips = {
+            'beach_golden_hour': "• Use backlighting for rim lighting effects\n• Have model face the golden light for warm skin tones\n• Try walking shots and flowing movements\n• For swimwear: confident poses, elongated lines",
+            'dark_moody_fashion': "• Strong, angular poses\n• Dramatic shadows across face\n• Minimal movement, controlled poses\n• Hands and body positioning matter",
+            'high_key_glamour': "• Soft, elegant poses\n• Avoid harsh angles\n• Gentle hand placement\n• Relaxed, approachable expressions",
+            'natural_outdoor_portrait': "• Candid, relaxed poses\n• Interaction with environment\n• Natural expressions\n• Comfortable positioning"
+        }
+        return posing_tips.get(scenario, "• Work with your model to find comfortable, natural poses\n• Try multiple angles and expressions\n• Consider the mood and style you want to convey")
+    
+    def _extract_lighting_content(self, setup_info: str) -> str:
+        """Extract lighting-specific information from setup content"""
+        # Split setup info and filter for lighting-related content
+        sentences = setup_info.split('.')
+        lighting_sentences = []
+        
+        lighting_keywords = ['light', 'lighting', 'illumination', 'shadow', 'highlight', 'backlight', 'fill', 'key light', 'rim light']
+        
+        for sentence in sentences:
+            if any(keyword in sentence.lower() for keyword in lighting_keywords):
+                lighting_sentences.append(sentence.strip())
+        
+        return '. '.join(lighting_sentences) if lighting_sentences else setup_info
     
     def _generate_beginner_response(self, photography_style: str, matched_gear: Dict[str, List[GearItem]], 
                                   message: str, chat_session: ChatSession) -> Dict[str, Any]:

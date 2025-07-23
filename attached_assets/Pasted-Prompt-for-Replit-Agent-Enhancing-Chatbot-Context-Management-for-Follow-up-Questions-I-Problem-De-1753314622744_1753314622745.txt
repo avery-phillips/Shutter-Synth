@@ -1,0 +1,60 @@
+Prompt for Replit Agent: Enhancing Chatbot Context Management for Follow-up Questions
+
+I. Problem Description: Loss of Conversational Context
+
+"Synthia is currently struggling to maintain conversational context when users ask follow-up questions or try to refine a previous request.
+
+Observed Behavior Example:
+
+User asks about a 'beach shoot at golden hour'. Synthia provides a comprehensive response (Setup, Gear, Angles, Settings, Pro Tip) which is good.
+
+User then asks 'Any posing suggestions you can offer?' (a follow-up question directly related to the previous topic).
+
+Synthia responds by asking 'What kind of photography look are you trying to achieve?' This shows a complete loss of the original 'beach shoot at golden hour' context.
+
+When the user clarifies with 'It'll be a combination of swimsuits and fashion', Synthia provides advice for a 'dramatic, low-key lighting' setup, which is irrelevant to a 'beach shoot at golden hour' and a mismatch for 'swimsuits and fashion' in that setting.
+
+Root Cause Analysis:
+Synthia appears to be treating each user message as a completely new, isolated query, searching for the best match in its photography_knowledge.json based only on the latest input, without remembering or building upon the established context from previous turns within the same session. This leads to disjointed and irrelevant responses for follow-up questions."
+
+II. Proposed Solution: Implement Basic Context Management
+
+"To address this, we need to introduce a mechanism for Synthia to maintain and utilize conversational context.
+
+Here's a proposed approach:
+
+Introduce a current_scenario or active_shoot_plan in the user's session data.
+
+When Synthia successfully identifies a primary photography 'look' or 'scenario' from the user's initial query (e.g., 'beach shoot at golden hour'), this scenario's key (e.g., a simplified string like "beach_golden_hour") should be stored in the Flask session object (or in the database alongside chat history if persistent state is desired across browser closures).
+
+This current_scenario should represent the overarching topic of the conversation.
+
+Modify the chat processing logic in Flask (main.py):
+
+On a new user message:
+
+First, attempt to identify if the user's message is a follow-up or refinement related to the current_scenario. Look for keywords like "posing," "lighting," "gear," "settings," "angles," "composition," "tips," or "how to achieve X" that build upon the existing context.
+
+If the message is identified as a follow-up, retrieve the current_scenario from the session. Then, instead of finding a new 'look', access the specific parts of the photography_knowledge.json related to the current_scenario that match the follow-up request (e.g., just the 'Posing & Composition' section for a 'posing' question).
+
+If the message is clearly a completely new and unrelated query (e.g., "Tell me about astrophotography" after a "beach shoot"), then reset the current_scenario and process it as a new main query.
+
+Adjust the photography_knowledge.json structure (if necessary):
+
+Ensure each scenario within photography_knowledge.json has clearly delineated sections (e.g., setup, gear, angles_composition, camera_settings, pro_tip, posing_suggestions, lighting_techniques) that can be individually referenced and extracted.
+
+Self-correction: The existing structure already seems to have these categories (Setup, Recommended Gear, Angles & Composition, Camera Settings, Pro Tip). You might need to add a Posing Suggestions section within existing scenarios if it's not explicitly covered and distinguish how "fashion" and "swimsuits" apply within the "beach_golden_hour" context rather than triggering a new, dark/moody fashion context.
+
+Specific Implementation Task:
+
+Implement Flask session management for current_scenario: Store and retrieve the active scenario based on the most recent successfully identified 'look'.
+
+Update main.py (or relevant route handler) to:
+
+Prioritize checking for follow-up keywords against the current_scenario.
+
+If a follow-up is detected, extract only the relevant sub-section from the photography_knowledge.json associated with the current_scenario and return that.
+
+If no current_scenario exists or the query is clearly new, then identify a new primary 'look' and update current_scenario.
+
+For the "swimsuits and fashion" follow-up, it should ideally add detail to the existing "beach shoot at golden hour" context, perhaps by pulling fashion/swimsuit-specific posing and composition tips that are compatible with golden hour on a beach, rather than completely changing the lighting style. This might require some careful logic to merge or prioritize.

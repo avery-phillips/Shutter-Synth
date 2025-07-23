@@ -314,7 +314,13 @@ def send_message():
     
     # Update session context
     chat_session.current_step = response_data.get('next_step', chat_session.current_step)
-    chat_session.conversation_context = response_data.get('context')
+    
+    # Merge context properly - preserve existing context and add new context
+    new_context = response_data.get('context', {})
+    if chat_session.conversation_context:
+        chat_session.conversation_context.update(new_context)
+    else:
+        chat_session.conversation_context = new_context
     
     db.session.commit()
     
