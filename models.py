@@ -60,3 +60,20 @@ class ChatMessage(db.Model):
     
     # Relationships
     session: Mapped["ChatSession"] = relationship("ChatSession", back_populates="messages")
+    uploaded_images: Mapped[List["UploadedImage"]] = relationship("UploadedImage", back_populates="message", cascade="all, delete-orphan")
+
+class UploadedImage(db.Model):
+    __tablename__ = 'uploaded_images'
+    
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    message_id: Mapped[int] = mapped_column(Integer, db.ForeignKey('chat_messages.id'), nullable=False)
+    filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    original_filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    file_path: Mapped[str] = mapped_column(String(500), nullable=False)
+    file_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    mime_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    analysis_result: Mapped[Optional[str]] = mapped_column(JSON)  # Store AI analysis results
+    uploaded_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    message: Mapped["ChatMessage"] = relationship("ChatMessage", back_populates="uploaded_images")

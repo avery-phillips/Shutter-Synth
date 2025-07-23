@@ -1,12 +1,32 @@
 from flask import render_template, request, redirect, url_for, session, flash, jsonify
+from werkzeug.utils import secure_filename
 from app import app, db
-from models import User, GearItem, ChatSession, ChatMessage
+from models import User, GearItem, ChatSession, ChatMessage, UploadedImage
 from chat_engine import SynthiaChatEngine
 import uuid
 import logging
+import os
+import time
+
+# Configure upload settings
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'}
+MAX_FILE_SIZE = 16 * 1024 * 1024  # 16MB
+
+# Ensure upload directory exists
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Configure Flask app for file uploads
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
 
 # Initialize chat engine
 chat_engine = SynthiaChatEngine()
+
+def allowed_file(filename):
+    """Check if uploaded file has allowed extension"""
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def index():
@@ -180,7 +200,7 @@ def chat():
 
 @app.route('/chat/send', methods=['POST'])
 def send_message():
-    """Handle chat message sending"""
+    """Handle chat message sending with optional file uploads"""
     if 'user_id' not in session:
         return jsonify({'error': 'Not authenticated'}), 401
     
@@ -188,12 +208,19 @@ def send_message():
     if not user:
         return jsonify({'error': 'User not found'}), 404
     
-    data = request.get_json()
-    message_content = data.get('message', '').strip()
-    session_token = data.get('session_token')
+    # Handle both JSON and form data (for file uploads)
+    if request.content_type and 'multipart/form-data' in request.content_type:
+        message_content = request.form.get('message', '').strip()
+        session_token = request.form.get('session_token')
+        uploaded_files = request.files.getlist('images')
+    else:
+        data = request.get_json()
+        message_content = data.get('message', '').strip()
+        session_token = data.get('session_token')
+        uploaded_files = []
     
-    if not message_content:
-        return jsonify({'error': 'Message content is required'}), 400
+    if not message_content and not uploaded_files:
+        return jsonify({'error': 'Message content or image is required'}), 400
     
     # Find chat session
     chat_session = ChatSession.query.filter_by(session_token=session_token, user_id=user.id).first()
@@ -204,8 +231,39 @@ def send_message():
     user_message = ChatMessage()
     user_message.session_id = chat_session.id
     user_message.message_type = 'user'
-    user_message.content = message_content
+    user_message.content = message_content or "Uploaded image for analysis"
     db.session.add(user_message)
+    db.session.commit()  # Commit to get message ID
+    
+    # Handle file uploads
+    uploaded_images = []
+    for file in uploaded_files:
+        if file and file.filename and allowed_file(file.filename):
+            try:
+                # Generate unique filename
+                timestamp = str(int(time.time()))
+                filename = secure_filename(file.filename)
+                unique_filename = f"{timestamp}_{filename}"
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+                
+                # Save file
+                file.save(file_path)
+                
+                # Create UploadedImage record
+                uploaded_image = UploadedImage()
+                uploaded_image.message_id = user_message.id
+                uploaded_image.filename = unique_filename
+                uploaded_image.original_filename = filename
+                uploaded_image.file_path = file_path
+                uploaded_image.file_size = os.path.getsize(file_path)
+                uploaded_image.mime_type = file.content_type or 'image/jpeg'
+                
+                db.session.add(uploaded_image)
+                uploaded_images.append(uploaded_image)
+                
+            except Exception as e:
+                logging.error(f"Error saving uploaded file: {str(e)}")
+                return jsonify({'error': 'Failed to save uploaded image'}), 500
     
     # Generate bot response
     user_gear = GearItem.query.filter_by(user_id=user.id).all()
@@ -213,7 +271,8 @@ def send_message():
         message_content,
         user.skill_level,
         user_gear,
-        chat_session
+        chat_session,
+        uploaded_images
     )
     
     # Save bot response
@@ -234,7 +293,8 @@ def send_message():
     return jsonify({
         'response': response_data['content'],
         'step_number': response_data.get('step_number'),
-        'awaiting_continuation': response_data.get('awaiting_continuation', False)
+        'awaiting_continuation': response_data.get('awaiting_continuation', False),
+        'uploaded_images': len(uploaded_images)
     })
 
 @app.route('/profile', methods=['GET', 'POST'])

@@ -2,13 +2,15 @@ import json
 import logging
 import re
 from typing import Dict, List, Any, Optional
-from models import GearItem, ChatSession
+from models import GearItem, ChatSession, UploadedImage
+from image_analysis import create_image_analysis_service
 
 class SynthiaChatEngine:
     """Synthia - The photography shoot planning assistant"""
     
     def __init__(self):
         self.knowledge_base = self._load_knowledge_base()
+        self.image_analysis_service = create_image_analysis_service()
         
     def _load_knowledge_base(self) -> Dict[str, Any]:
         """Load photography knowledge base from JSON file"""
@@ -23,8 +25,12 @@ class SynthiaChatEngine:
             return {}
     
     def generate_response(self, message: str, skill_level: str, user_gear: List[GearItem], 
-                         chat_session: ChatSession) -> Dict[str, Any]:
+                         chat_session: ChatSession, uploaded_images: Optional[List[UploadedImage]] = None) -> Dict[str, Any]:
         """Generate appropriate response based on skill level and context"""
+        
+        # Handle image analysis if images are uploaded
+        if uploaded_images:
+            return self._handle_image_analysis(message, skill_level, user_gear, uploaded_images)
         
         # Parse user input and detect intent
         intent = self._classify_intent(message)
@@ -326,3 +332,162 @@ class SynthiaChatEngine:
         for category, items in matched_gear.items():
             serialized[category] = [{'brand': item.brand, 'model': item.model} for item in items]
         return serialized
+    
+    def _handle_image_analysis(self, message: str, skill_level: str, user_gear: List[GearItem], 
+                              uploaded_images: List[UploadedImage]) -> Dict[str, Any]:
+        """Handle image analysis requests"""
+        
+        # Determine analysis type based on message content
+        analysis_type = "inspiration"
+        if any(word in message.lower() for word in ["feedback", "critique", "improve", "better", "review"]):
+            analysis_type = "technique"
+        
+        # Analyze the first uploaded image
+        image = uploaded_images[0]
+        analysis_result = self.image_analysis_service.analyze_photography_image(
+            image.file_path, 
+            analysis_type
+        )
+        
+        if not analysis_result["success"]:
+            return {
+                'content': f"I'm sorry, I had trouble analyzing your image: {analysis_result['error']}. Please try uploading a different image.",
+                'message_type': 'error',
+                'metadata': {'has_images': True, 'analysis_type': analysis_type}
+            }
+        
+        # Store analysis result in the image record
+        image.analysis_result = analysis_result["analysis"]
+        
+        # Generate personalized response based on analysis and skill level
+        if analysis_type == "inspiration":
+            return self._generate_inspiration_response(analysis_result["analysis"], skill_level, user_gear, message)
+        else:
+            return self._generate_technique_feedback_response(analysis_result["analysis"], skill_level, user_gear, message)
+    
+    def _generate_inspiration_response(self, analysis: Dict[str, Any], skill_level: str, 
+                                     user_gear: List[GearItem], message: str) -> Dict[str, Any]:
+        """Generate response for inspiration image analysis"""
+        
+        # Extract key information from analysis
+        lighting = analysis.get("lighting_analysis", {})
+        composition = analysis.get("composition", {})
+        settings = analysis.get("camera_settings", {})
+        recreate_tips = analysis.get("recreate_tips", {})
+        
+        # Check user's gear against requirements
+        available_gear = [f"{item.brand} {item.model}" for item in user_gear]
+        equipment_needed = recreate_tips.get("equipment_needed", [])
+        
+        # Build personalized response
+        response_parts = []
+        
+        if skill_level == 'Beginner':
+            response_parts.append("Great inspiration image! Let me break down how to recreate this look in simple steps:")
+            response_parts.append(f"\n**📸 Lighting Setup:**\n{lighting.get('lighting_setup', 'Natural lighting recommended')}")
+            response_parts.append(f"\n**📐 Camera Position:**\n{composition.get('camera_angle', 'Standard positioning')}")
+            response_parts.append(f"\n**⚙️ Camera Settings:**")
+            response_parts.append(f"• Aperture: {settings.get('estimated_aperture', 'f/5.6')}")
+            response_parts.append(f"• ISO: {settings.get('estimated_iso', '400')}")
+            response_parts.append(f"• Focus: {settings.get('focus_point', 'Subject')}")
+        else:
+            response_parts.append("Excellent choice for inspiration! Here's my technical analysis:")
+            response_parts.append(f"\n**Lighting Analysis:**\n{lighting.get('primary_light_source', 'Analysis unavailable')} - {lighting.get('light_quality', '')}")
+            response_parts.append(f"\n**Technical Settings:**")
+            response_parts.append(f"• Estimated aperture: {settings.get('estimated_aperture', 'f/5.6')} - {settings.get('estimated_shutter_speed', '1/125s')}")
+            response_parts.append(f"• ISO: {settings.get('estimated_iso', '400')}")
+            response_parts.append(f"• Estimated focal length: {composition.get('focal_length', '85mm')}")
+        
+        # Add gear-specific recommendations
+        response_parts.append(f"\n**🎯 With Your Gear:**")
+        gear_advice = []
+        for item in user_gear:
+            if item.category == 'camera_body':
+                gear_advice.append(f"• Your {item.brand} {item.model} will work perfectly for this shot")
+            elif item.category == 'lens' and any(focal in item.model.lower() for focal in ['85', '50', '35']):
+                gear_advice.append(f"• Use your {item.brand} {item.model} for similar focal length")
+        
+        if gear_advice:
+            response_parts.extend(gear_advice)
+        else:
+            response_parts.append("• Consider using a portrait lens (85mm or 50mm) for best results")
+        
+        # Add step-by-step recreation guide
+        steps = recreate_tips.get("step_by_step", [])
+        if steps and skill_level == 'Beginner':
+            response_parts.append(f"\n**📋 Step-by-Step Guide:**")
+            for i, step in enumerate(steps[:4], 1):
+                response_parts.append(f"{i}. {step}")
+        
+        content = "\n".join(response_parts)
+        
+        return {
+            'content': content,
+            'message_type': 'image_analysis',
+            'metadata': {
+                'analysis_type': 'inspiration',
+                'has_images': True,
+                'gear_matched': len(gear_advice) > 0
+            }
+        }
+    
+    def _generate_technique_feedback_response(self, analysis: Dict[str, Any], skill_level: str,
+                                            user_gear: List[GearItem], message: str) -> Dict[str, Any]:
+        """Generate response for technique feedback analysis"""
+        
+        # Extract key information from analysis
+        technical = analysis.get("technical_assessment", {})
+        strengths = analysis.get("strengths", [])
+        improvements = analysis.get("improvements", {})
+        tips = analysis.get("specific_tips", {})
+        rating = analysis.get("overall_rating", "No rating available")
+        
+        response_parts = []
+        
+        response_parts.append("Thanks for sharing your photo! Here's my analysis and feedback:")
+        response_parts.append(f"\n**⭐ Overall Assessment:** {rating}")
+        
+        # Highlight strengths
+        if strengths:
+            response_parts.append(f"\n**✅ What's Working Well:**")
+            for strength in strengths[:3]:  # Limit to top 3
+                response_parts.append(f"• {strength}")
+        
+        # Technical assessment
+        response_parts.append(f"\n**🔍 Technical Review:**")
+        if technical.get("exposure"):
+            response_parts.append(f"• **Exposure:** {technical['exposure']}")
+        if technical.get("focus"):
+            response_parts.append(f"• **Focus:** {technical['focus']}")
+        if technical.get("composition"):
+            response_parts.append(f"• **Composition:** {technical['composition']}")
+        
+        # Improvement suggestions based on skill level
+        if skill_level == 'Beginner':
+            immediate_improvements = improvements.get("immediate", [])
+            if immediate_improvements:
+                response_parts.append(f"\n**🎯 Quick Improvements to Try:**")
+                for improvement in immediate_improvements[:3]:
+                    response_parts.append(f"• {improvement}")
+        else:
+            technique_improvements = improvements.get("technique", [])
+            if technique_improvements:
+                response_parts.append(f"\n**📈 Technique Development:**")
+                for improvement in technique_improvements:
+                    response_parts.append(f"• {improvement}")
+        
+        # Specific tips
+        if tips.get("camera_settings"):
+            response_parts.append(f"\n**⚙️ Settings Suggestion:** {tips['camera_settings']}")
+        
+        content = "\n".join(response_parts)
+        
+        return {
+            'content': content,
+            'message_type': 'image_analysis',
+            'metadata': {
+                'analysis_type': 'technique',
+                'has_images': True,
+                'rating': rating
+            }
+        }

@@ -7,6 +7,10 @@ class ChatInterface {
         this.sendButton = document.getElementById('sendButton');
         this.sessionToken = document.getElementById('sessionToken').value;
         this.typingIndicator = document.getElementById('typingIndicator');
+        this.imageInput = document.getElementById('imageInput');
+        this.imageUploadArea = document.getElementById('imageUploadArea');
+        this.imagePreview = document.getElementById('imagePreview');
+        this.selectedFiles = [];
         
         this.initializeEventListeners();
         this.scrollToBottom();
@@ -49,6 +53,32 @@ class ChatInterface {
         this.messageInput.addEventListener('input', () => {
             this.autoResizeTextarea();
         });
+        
+        // Image upload event listeners
+        this.imageInput.addEventListener('change', (e) => {
+            this.handleFileSelect(e.target.files);
+        });
+        
+        // Drag and drop for image upload area
+        this.imageUploadArea.addEventListener('click', () => {
+            this.imageInput.click();
+        });
+        
+        this.imageUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            this.imageUploadArea.classList.add('dragover');
+        });
+        
+        this.imageUploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            this.imageUploadArea.classList.remove('dragover');
+        });
+        
+        this.imageUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            this.imageUploadArea.classList.remove('dragover');
+            this.handleFileSelect(e.dataTransfer.files);
+        });
     }
     
     autoResizeTextarea() {
@@ -56,15 +86,95 @@ class ChatInterface {
         this.messageInput.style.height = (this.messageInput.scrollHeight) + 'px';
     }
     
+    handleFileSelect(files) {
+        // Add selected files to the array
+        for (let file of files) {
+            if (this.isValidImageFile(file)) {
+                this.selectedFiles.push(file);
+                this.addImagePreview(file);
+            } else {
+                alert(`${file.name} is not a valid image file. Please select PNG, JPG, GIF, or other image formats.`);
+            }
+        }
+    }
+    
+    isValidImageFile(file) {
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'];
+        const maxSize = 16 * 1024 * 1024; // 16MB
+        
+        if (!validTypes.includes(file.type)) {
+            return false;
+        }
+        
+        if (file.size > maxSize) {
+            alert(`${file.name} is too large. Maximum file size is 16MB.`);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    addImagePreview(file) {
+        const previewItem = document.createElement('div');
+        previewItem.className = 'image-preview-item';
+        
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.alt = file.name;
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-image';
+        removeBtn.innerHTML = '×';
+        removeBtn.onclick = () => {
+            this.removeImagePreview(file, previewItem);
+        };
+        
+        previewItem.appendChild(img);
+        previewItem.appendChild(removeBtn);
+        this.imagePreview.appendChild(previewItem);
+    }
+    
+    removeImagePreview(file, previewItem) {
+        // Remove from selected files
+        this.selectedFiles = this.selectedFiles.filter(f => f !== file);
+        
+        // Remove preview element
+        previewItem.remove();
+        
+        // Revoke object URL to free memory
+        URL.revokeObjectURL(previewItem.querySelector('img').src);
+    }
+    
+    clearImagePreviews() {
+        // Revoke all object URLs
+        this.imagePreview.querySelectorAll('img').forEach(img => {
+            URL.revokeObjectURL(img.src);
+        });
+        
+        // Clear preview container and selected files
+        this.imagePreview.innerHTML = '';
+        this.selectedFiles = [];
+    }
+
     async sendMessage() {
         const message = this.messageInput.value.trim();
-        if (!message) return;
+        
+        // Check if we have message or images
+        if (!message && this.selectedFiles.length === 0) {
+            return;
+        }
         
         // Disable input while sending
         this.setLoadingState(true);
         
+        // Prepare message content for display
+        let displayMessage = message || 'Uploaded image for analysis';
+        if (this.selectedFiles.length > 0) {
+            displayMessage += ` [${this.selectedFiles.length} image(s) attached]`;
+        }
+        
         // Add user message to chat
-        this.addMessage('user', message);
+        this.addMessage('user', displayMessage);
         
         // Clear input
         this.messageInput.value = '';
@@ -74,16 +184,39 @@ class ChatInterface {
         this.showTypingIndicator();
         
         try {
-            const response = await fetch('/chat/send', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    message: message,
-                    session_token: this.sessionToken
-                })
-            });
+            let response;
+            
+            if (this.selectedFiles.length > 0) {
+                // Send as FormData for file uploads
+                const formData = new FormData();
+                formData.append('message', message);
+                formData.append('session_token', this.sessionToken);
+                
+                // Add all selected files
+                this.selectedFiles.forEach((file, index) => {
+                    formData.append('images', file);
+                });
+                
+                response = await fetch('/chat/send', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                // Clear uploaded images after sending
+                this.clearImagePreviews();
+            } else {
+                // Send as JSON for text-only messages
+                response = await fetch('/chat/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        session_token: this.sessionToken
+                    })
+                });
+            }
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
