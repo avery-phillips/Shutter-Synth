@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - Shutter Synth{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center py-5">
+        <div class="col-lg-6 text-center">
+            <i class="fas fa-exclamation-triangle display-1 text-warning mb-4"></i>
+            <h2>Something went wrong</h2>
+            <p class="text-muted">We're experiencing a temporary issue. Please try again in a moment.</p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                <i class="fas fa-home"></i> Return Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
