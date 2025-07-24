@@ -8,7 +8,7 @@ class ChatInterface {
         this.sessionToken = document.getElementById('sessionToken').value;
         this.typingIndicator = document.getElementById('typingIndicator');
         this.imageInput = document.getElementById('imageInput');
-        this.imageUploadArea = document.getElementById('imageUploadArea');
+        this.imageUploadBtn = document.getElementById('imageUploadBtn');
         this.imagePreview = document.getElementById('imagePreview');
         this.selectedFiles = [];
         
@@ -59,25 +59,9 @@ class ChatInterface {
             this.handleFileSelect(e.target.files);
         });
         
-        // Drag and drop for image upload area
-        this.imageUploadArea.addEventListener('click', () => {
+        // Image upload button click
+        this.imageUploadBtn.addEventListener('click', () => {
             this.imageInput.click();
-        });
-        
-        this.imageUploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            this.imageUploadArea.classList.add('dragover');
-        });
-        
-        this.imageUploadArea.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            this.imageUploadArea.classList.remove('dragover');
-        });
-        
-        this.imageUploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            this.imageUploadArea.classList.remove('dragover');
-            this.handleFileSelect(e.dataTransfer.files);
         });
     }
     
@@ -95,6 +79,11 @@ class ChatInterface {
             } else {
                 alert(`${file.name} is not a valid image file. Please select PNG, JPG, GIF, or other image formats.`);
             }
+        }
+        
+        // Show the preview container if files are selected
+        if (this.selectedFiles.length > 0) {
+            this.imagePreview.style.display = 'flex';
         }
     }
     
@@ -143,6 +132,11 @@ class ChatInterface {
         
         // Revoke object URL to free memory
         URL.revokeObjectURL(previewItem.querySelector('img').src);
+        
+        // Hide preview container if no files left
+        if (this.selectedFiles.length === 0) {
+            this.imagePreview.style.display = 'none';
+        }
     }
     
     clearImagePreviews() {
@@ -154,6 +148,7 @@ class ChatInterface {
         // Clear preview container and selected files
         this.imagePreview.innerHTML = '';
         this.selectedFiles = [];
+        this.imagePreview.style.display = 'none';
     }
 
     async sendMessage() {
