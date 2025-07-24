@@ -31,23 +31,57 @@
     <form method="POST" id="gearForm">
         <!-- Camera Bodies -->
         <div class="gear-section">
-            <h4><i class="fas fa-camera"></i> Camera Body</h4>
-            <p class="text-muted">Your primary camera body</p>
+            <h4><i class="fas fa-camera"></i> Camera Bodies</h4>
+            <p class="text-muted">Your camera bodies (add multiple if you own more than one)</p>
             
-            <div class="row">
-                <div class="col-md-6">
-                    <label for="camera_brand" class="form-label">Brand</label>
-                    <input type="text" class="form-control" id="camera_brand" name="camera_brand" 
-                           placeholder="e.g., Sony, Canon, Nikon"
-                           value="{% if existing_gear.camera_bodies %}{{ existing_gear.camera_bodies[0].brand }}{% endif %}">
-                </div>
-                <div class="col-md-6">
-                    <label for="camera_model" class="form-label">Model</label>
-                    <input type="text" class="form-control" id="camera_model" name="camera_model" 
-                           placeholder="e.g., A7IV, 5D Mark IV, Z6II"
-                           value="{% if existing_gear.camera_bodies %}{{ existing_gear.camera_bodies[0].model }}{% endif %}">
-                </div>
+            <div id="cameras-container">
+                {% if existing_gear.camera_bodies %}
+                    {% for camera in existing_gear.camera_bodies %}
+                    <div class="gear-item camera-item">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6>Camera {{ loop.index }}</h6>
+                            {% if loop.index > 1 %}
+                            <button type="button" class="btn btn-outline-danger btn-sm remove-camera">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Brand</label>
+                                <input type="text" class="form-control" name="camera_brand_{{ loop.index0 }}" 
+                                       placeholder="Sony, Canon, Nikon" value="{{ camera.brand }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Model</label>
+                                <input type="text" class="form-control" name="camera_model_{{ loop.index0 }}" 
+                                       placeholder="A7IV, 5D Mark IV, Z6II" value="{{ camera.model }}">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="gear-item camera-item">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6>Camera 1</h6>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Brand</label>
+                                <input type="text" class="form-control" name="camera_brand_0" placeholder="Sony, Canon, Nikon">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Model</label>
+                                <input type="text" class="form-control" name="camera_model_0" placeholder="A7IV, 5D Mark IV, Z6II">
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
+            
+            <button type="button" id="add-camera" class="btn btn-outline-primary mt-3">
+                <i class="fas fa-plus"></i> Add Another Camera Body
+            </button>
         </div>
 
         <!-- Lenses -->
@@ -275,6 +309,43 @@
 
 {% block extra_scripts %}
 <script>
+// Camera management
+let cameraCount = {{ existing_gear.camera_bodies|length if existing_gear.camera_bodies else 1 }};
+
+document.getElementById('add-camera').addEventListener('click', function() {
+    const container = document.getElementById('cameras-container');
+    const newCamera = document.createElement('div');
+    newCamera.className = 'gear-item camera-item';
+    newCamera.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6>Camera ${cameraCount + 1}</h6>
+            <button type="button" class="btn btn-outline-danger btn-sm remove-camera">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <label class="form-label">Brand</label>
+                <input type="text" class="form-control" name="camera_brand_${cameraCount}" placeholder="Sony, Canon, Nikon">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Model</label>
+                <input type="text" class="form-control" name="camera_model_${cameraCount}" placeholder="A7IV, 5D Mark IV, Z6II">
+            </div>
+        </div>
+    `;
+    container.appendChild(newCamera);
+    cameraCount++;
+});
+
+// Remove camera functionality
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.remove-camera')) {
+        e.target.closest('.camera-item').remove();
+        cameraCount = Math.max(1, cameraCount - 1);
+    }
+});
+
 // Lens management
 let lensCount = parseInt(document.getElementById('lens_count').value);
 

@@ -59,9 +59,10 @@ def onboarding():
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         skill_level = request.form.get('skill_level', 'Beginner')
+        main_specialization = request.form.get('main_specialization')
         
-        if not username:
-            flash('Username is required', 'error')
+        if not username or not main_specialization:
+            flash('Username and photography specialization are required', 'error')
             return render_template('onboarding.html')
         
         # Check if user already exists
@@ -74,6 +75,7 @@ def onboarding():
         user = User()
         user.username = username
         user.skill_level = skill_level
+        user.main_specialization = main_specialization
         db.session.add(user)
         db.session.commit()
         
@@ -105,14 +107,22 @@ def gear_input():
         # Clear existing gear for this user
         GearItem.query.filter_by(user_id=user.id).delete()
         
-        # Process camera bodies
-        if gear_data.get('camera_brand') and gear_data.get('camera_model'):
+        # Process camera bodies (multiple cameras supported)
+        camera_index = 0
+        while True:
+            camera_brand = gear_data.get(f'camera_brand_{camera_index}')
+            camera_model = gear_data.get(f'camera_model_{camera_index}')
+            
+            if not camera_brand or not camera_model:
+                break
+                
             camera = GearItem()
             camera.user_id = user.id
             camera.category = 'camera_body'
-            camera.brand = gear_data['camera_brand']
-            camera.model = gear_data['camera_model']
+            camera.brand = camera_brand
+            camera.model = camera_model
             db.session.add(camera)
+            camera_index += 1
         
         # Process lenses
         lens_count = int(gear_data.get('lens_count', 0))
@@ -300,7 +310,8 @@ def send_message():
         user.skill_level,
         user_gear,
         chat_session,
-        uploaded_images
+        uploaded_images,
+        user.main_specialization
     )
     
     # Save bot response
@@ -344,13 +355,17 @@ def profile():
     
     if request.method == 'POST':
         new_skill_level = request.form.get('skill_level')
+        new_specialization = request.form.get('main_specialization')
+        
         if new_skill_level in ['Beginner', 'Intermediate', 'Advanced']:
             user.skill_level = new_skill_level
             session['skill_level'] = new_skill_level
-            db.session.commit()
-            flash('Skill level updated successfully!', 'success')
-        else:
-            flash('Invalid skill level selected.', 'error')
+            
+        if new_specialization:
+            user.main_specialization = new_specialization
+            
+        db.session.commit()
+        flash('Profile updated successfully!', 'success')
     
     # Get user's gear summary
     gear_summary = {

@@ -10,6 +10,7 @@ class User(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     username: Mapped[str] = mapped_column(String(80), unique=True, nullable=False)
     skill_level: Mapped[str] = mapped_column(String(20), nullable=False, default='Beginner')  # Beginner, Intermediate, Advanced
+    main_specialization: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)  # Primary photography type
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     

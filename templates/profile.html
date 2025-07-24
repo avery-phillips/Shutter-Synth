@@ -26,6 +26,11 @@
                                     {{ user.skill_level }}
                                 </span>
                             </p>
+                            <p><strong>Main Specialization:</strong> 
+                                <span class="badge bg-secondary fs-6">
+                                    {{ user.main_specialization or 'Not set' }}
+                                </span>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -83,8 +88,24 @@
                             </div>
                         </div>
                         
+                        <!-- Photography Specialization -->
+                        <div class="mb-3">
+                            <label for="main_specialization" class="form-label">Main Photography Specialization:</label>
+                            <select class="form-control" id="main_specialization" name="main_specialization">
+                                <option value="">Select your primary photography type</option>
+                                <option value="Portrait" {% if user.main_specialization == 'Portrait' %}selected{% endif %}>Portrait</option>
+                                <option value="Fashion" {% if user.main_specialization == 'Fashion' %}selected{% endif %}>Fashion</option>
+                                <option value="Sports" {% if user.main_specialization == 'Sports' %}selected{% endif %}>Sports</option>
+                                <option value="Glamour" {% if user.main_specialization == 'Glamour' %}selected{% endif %}>Glamour</option>
+                                <option value="Boudoir" {% if user.main_specialization == 'Boudoir' %}selected{% endif %}>Boudoir</option>
+                                <option value="Headshot" {% if user.main_specialization == 'Headshot' %}selected{% endif %}>Headshot</option>
+                                <option value="General" {% if user.main_specialization == 'General' %}selected{% endif %}>General / Mixed</option>
+                            </select>
+                            <div class="form-text">This helps Synthia provide more relevant default advice.</div>
+                        </div>
+                        
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Update Skill Level
+                            <i class="fas fa-save"></i> Update Profile
                         </button>
                     </form>
                 </div>

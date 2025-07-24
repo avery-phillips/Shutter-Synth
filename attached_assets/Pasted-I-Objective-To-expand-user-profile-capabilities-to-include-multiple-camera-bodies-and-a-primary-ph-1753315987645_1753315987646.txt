@@ -1,0 +1,69 @@
+I. Objective: To expand user profile capabilities to include multiple camera bodies and a primary photography specialization, enabling more personalized advice from Synthia.
+
+II. Implementation Details:
+
+Update Database Schema (users.db):
+
+Modify the users table or create a new linked table to allow for multiple camera bodies per user. The existing gear input might already support multiple entries if it's dynamic, but ensure the database schema can store distinct entries for each camera body (e.g., camera_body_id, user_id, brand, model).
+
+Add a new column to the users table (e.g., main_specialization) to store the user's primary photography type. This should be a string field.
+
+Modify Gear Input Section (gear_input.html):
+
+Allow for Multiple Camera Bodies:
+
+In the "Camera Bodies" section of the gear input form, implement a mechanism (e.g., an "Add another Camera Body" button that dynamically adds new input fields) to allow users to input details for more than one camera body.
+
+Ensure each camera body input captures Brand and Model.
+
+Provide clear options to remove individual camera bodies if a user makes a mistake or no longer owns one.
+
+Ensure existing "Gear Input" functionality remains robust for lenses, lighting, etc.
+
+Modify User Onboarding/Profile Creation (onboarding.html or initial setup):
+
+Add Photography Specialization Dropdown:
+
+Introduce a new form field, preferably a dropdown menu, labeled "Your Main Photography Specialization" or "Primary Photography Type."
+
+Populate this dropdown with the following options: "Fashion," "Portrait," "Sports," "Glamour," "Boudoir," "Headshot," and potentially "General" or "Other."
+
+Make this a required field during initial onboarding.
+
+Store the selected value in the new main_specialization column in the users.db table.
+
+Update Chatbot Core Logic (main.py - Synthia's responses):
+
+Leverage main_specialization for Default Curation:
+
+When Synthia provides an initial response or if the user's query is very general (e.g., "Give me some tips"), Synthia should consider the user's main_specialization from their profile to curate the advice towards that genre.
+
+Crucially: If the user explicitly mentions a different genre in their current message (e.g., main_specialization is 'Portrait' but they ask about 'Sports' photography), Synthia must prioritize the explicit genre mentioned in the current query and override the main_specialization for that specific response.
+
+Enhance Gear Matching with Multiple Camera Bodies:
+
+When providing "Recommended Gear from Your Collection," Synthia should now iterate through all registered camera bodies for the user and suggest the most appropriate one(s) for the given scenario, explaining why a particular body might be suitable (e.g., "Use your [Sony A7S III] for its low-light capabilities" or "Your [Nikon D850] is ideal for its high resolution").
+
+User Interface Updates (Refine existing pages):
+
+Profile Page: Ensure the user's selected main_specialization is displayed on their profile page.
+
+Chat Interface: Consider if the initial greeting from Synthia (Hi {{ user.username }}!) could be enhanced to acknowledge the user's main_specialization (e.g., "Hi {{ user.username }}! Ready to plan some amazing {{ user.main_specialization }} shots today?").
+
+III. Constraints & Considerations:
+
+Ensure the database migrations for users.db are handled gracefully without data loss.
+
+Prioritize secure handling of all user input and data.
+
+The main_specialization should act as a default guide, not a strict filter that prevents advice on other genres when explicitly requested.
+
+IV. Deliverables:
+
+Updated database schema (if direct SQLite changes are needed, describe them).
+
+Modified gear_input.html to support multiple camera bodies.
+
+Modified onboarding/profile creation HTML to include the specialization dropdown.
+
+Updated main.py logic for Synthia to utilize main_specialization and to select appropriate camera bodies from multiple options.

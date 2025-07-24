@@ -25,7 +25,8 @@ class SynthiaChatEngine:
             return {}
     
     def generate_response(self, message: str, skill_level: str, user_gear: List[GearItem], 
-                         chat_session: ChatSession, uploaded_images: Optional[List[UploadedImage]] = None) -> Dict[str, Any]:
+                         chat_session: ChatSession, uploaded_images: Optional[List[UploadedImage]] = None, 
+                         user_specialization: Optional[str] = None) -> Dict[str, Any]:
         """Generate appropriate response based on skill level and context"""
         
         # Handle image analysis if images are uploaded
@@ -60,7 +61,8 @@ class SynthiaChatEngine:
             else:
                 return self._generate_comprehensive_response(photography_style, matched_gear, skill_level, message)
         else:
-            return self._generate_general_response(message, skill_level)
+            # If no specific style mentioned, use user's specialization for default advice
+            return self._generate_general_response(message, skill_level, user_specialization)
     
     def _get_current_scenario(self, chat_session: ChatSession) -> Optional[str]:
         """Get the current conversation scenario from session context"""
@@ -259,11 +261,17 @@ class SynthiaChatEngine:
         content += f"{personalized_gear}\n\n"
         content += "**From Your Collection:** "
         
+        # Enhanced camera body recommendations
+        camera_advice = self._get_best_camera_for_scenario(matched_gear['cameras'], scenario)
         gear_summary = []
-        if matched_gear['cameras']:
-            gear_summary.append(f"Camera: {matched_gear['cameras'][0].brand} {matched_gear['cameras'][0].model}")
+        
+        if camera_advice:
+            gear_summary.append(f"Camera: {camera_advice}")
+        
         if matched_gear['lenses']:
-            gear_summary.append(f"Lens: {matched_gear['lenses'][0].brand} {matched_gear['lenses'][0].model}")
+            lens_advice = self._get_best_lens_for_scenario(matched_gear['lenses'], scenario)
+            gear_summary.append(f"Lens: {lens_advice}")
+        
         if matched_gear['lighting']:
             gear_summary.append(f"Lighting: {len(matched_gear['lighting'])} item(s)")
         
@@ -351,6 +359,58 @@ class SynthiaChatEngine:
                 lighting_sentences.append(sentence.strip())
         
         return '. '.join(lighting_sentences) if lighting_sentences else setup_info
+    
+    def _generate_specialization_advice(self, specialization: str, skill_level: str) -> Dict[str, Any]:
+        """Generate advice based on user's main specialization"""
+        
+        specialization_tips = {
+            'Portrait': {
+                'focus': 'connecting with subjects and creating flattering lighting',
+                'key_advice': '• Focus on eyes and expressions\n• Use soft, flattering lighting\n• Pay attention to posing and comfort\n• Consider background simplicity',
+                'gear_tips': 'Use 85mm or 135mm lenses for compression and flattering perspective'
+            },
+            'Fashion': {
+                'focus': 'creating striking, editorial looks with dramatic lighting',
+                'key_advice': '• Strong poses and confident expressions\n• Dramatic lighting and shadows\n• Pay attention to styling and wardrobe\n• Consider location and mood consistency',
+                'gear_tips': 'Use 85mm-135mm lenses and consider off-camera flash for dramatic effects'
+            },
+            'Sports': {
+                'focus': 'capturing action and peak moments',
+                'key_advice': '• Fast shutter speeds (1/500s or faster)\n• Continuous autofocus modes\n• Anticipate the action\n• Use burst mode for key moments',
+                'gear_tips': 'Use telephoto lenses (70-200mm or longer) and fast apertures'
+            },
+            'Glamour': {
+                'focus': 'creating polished, elegant beauty shots',
+                'key_advice': '• Soft, even lighting is key\n• Focus on makeup and styling details\n• Use flattering angles\n• Consider retouching workflow',
+                'gear_tips': 'Use portrait lenses (85mm+) and large softboxes or beauty dishes'
+            },
+            'Boudoir': {
+                'focus': 'creating intimate, tasteful portraits',
+                'key_advice': '• Comfort and trust are essential\n• Use soft, warm lighting\n• Focus on curves and shadows\n• Respect boundaries always',
+                'gear_tips': 'Use 85mm or 135mm lenses and continuous lighting for comfortable environment'
+            },
+            'Headshot': {
+                'focus': 'professional portraits for business use',
+                'key_advice': '• Even, professional lighting\n• Focus on eyes and expression\n• Clean, simple backgrounds\n• Consistent style for multiple subjects',
+                'gear_tips': 'Use 85mm-135mm lenses and studio lighting or large windows'
+            }
+        }
+        
+        spec_info = specialization_tips.get(specialization, specialization_tips['Portrait'])
+        
+        content = f"**{specialization} Photography Tips:**\n\n"
+        content += f"As a {specialization.lower()} photographer, your main focus should be on {spec_info['focus']}.\n\n"
+        content += f"**Key Techniques:**\n{spec_info['key_advice']}\n\n"
+        content += f"**Gear Recommendations:**\n{spec_info['gear_tips']}\n\n"
+        content += "Feel free to ask about specific scenarios, lighting setups, or techniques for your shoots!"
+        
+        return {
+            'content': content,
+            'step_number': None,
+            'next_step': 0,
+            'awaiting_continuation': False,
+            'context': {'specialization_advice': True}
+        }
     
     def _generate_beginner_response(self, photography_style: str, matched_gear: Dict[str, List[GearItem]], 
                                   message: str, chat_session: ChatSession) -> Dict[str, Any]:
@@ -547,8 +607,82 @@ class SynthiaChatEngine:
             'context': {}
         }
     
-    def _generate_general_response(self, message: str, skill_level: str) -> Dict[str, Any]:
-        """Generate general photography advice"""
+    def _get_best_camera_for_scenario(self, cameras: List[GearItem], scenario: str) -> str:
+        """Get the best camera recommendation for a specific scenario"""
+        if not cameras:
+            return "No cameras in collection"
+        
+        if len(cameras) == 1:
+            return f"{cameras[0].brand} {cameras[0].model}"
+        
+        # Camera recommendations based on scenario characteristics
+        camera_preferences = {
+            'dark_moody_fashion': ['A7S', 'A7R', '5D Mark IV', 'Z6', 'low light'],
+            'high_key_glamour': ['A7R', 'D850', '5D Mark IV', 'high resolution'],
+            'sports_action': ['A9', 'D6', '1DX', 'R3', 'fast burst'],
+            'beach_golden_hour': ['A7', '5D', 'Z6', 'dynamic range'],
+            'natural_outdoor_portrait': ['A7', '5D', 'Z6', 'general purpose']
+        }
+        
+        scenario_keywords = camera_preferences.get(scenario, ['general'])
+        
+        # Score cameras based on scenario fit
+        best_camera = cameras[0]
+        best_score = 0
+        
+        for camera in cameras:
+            score = 0
+            camera_name = f"{camera.brand} {camera.model}".lower()
+            
+            for keyword in scenario_keywords:
+                if keyword.lower() in camera_name:
+                    score += 1
+            
+            if score > best_score:
+                best_score = score
+                best_camera = camera
+        
+        # Add reasoning for the recommendation
+        camera_name = f"{best_camera.brand} {best_camera.model}"
+        if best_score > 0:
+            reason = self._get_camera_reason(best_camera, scenario)
+            return f"{camera_name} {reason}"
+        else:
+            return camera_name
+    
+    def _get_camera_reason(self, camera: GearItem, scenario: str) -> str:
+        """Get reasoning for camera selection"""
+        camera_name = f"{camera.brand} {camera.model}".lower()
+        
+        if 'a7s' in camera_name:
+            return "(excellent for low-light scenarios)"
+        elif 'a7r' in camera_name or 'd850' in camera_name:
+            return "(high resolution for detailed shots)"
+        elif any(x in camera_name for x in ['a9', 'd6', '1dx', 'r3']):
+            return "(fast burst rate for action)"
+        elif any(x in camera_name for x in ['5d', 'z6', 'a7']):
+            return "(versatile full-frame option)"
+        else:
+            return ""
+    
+    def _get_best_lens_for_scenario(self, lenses: List[GearItem], scenario: str) -> str:
+        """Get the best lens recommendation for a specific scenario"""
+        if not lenses:
+            return "No lenses in collection"
+        
+        if len(lenses) == 1:
+            return f"{lenses[0].brand} {lenses[0].model}"
+        
+        # Return all suitable lenses for now, can be enhanced with specific recommendations
+        lens_names = [f"{lens.brand} {lens.model}" for lens in lenses[:2]]  # Limit to 2 for readability
+        return ", ".join(lens_names)
+    
+    def _generate_general_response(self, message: str, skill_level: str, user_specialization: Optional[str] = None) -> Dict[str, Any]:
+        """Generate general photography advice based on user's specialization"""
+        
+        # If user has a specialization and message is general, provide specialized advice
+        if user_specialization and user_specialization != 'General' and any(word in message.lower() for word in ['tips', 'advice', 'help', 'suggest']):
+            return self._generate_specialization_advice(user_specialization, skill_level)
         
         general_responses = [
             "I'm Synthia, your photography shoot planning assistant! I can help you plan creative setups based on your gear and goals. Try asking me about specific looks like 'dark and moody fashion portrait' or 'high-key glamour shot'.",
