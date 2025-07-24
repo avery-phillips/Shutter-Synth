@@ -395,6 +395,13 @@ def new_session():
     
     return redirect(url_for('chat'))
 
+@app.route('/logout')
+def logout():
+    """Clear session and return to home page"""
+    session.clear()
+    flash('Session cleared. You can now create a new profile.', 'info')
+    return redirect(url_for('index'))
+
 @app.errorhandler(404)
 def not_found_error(error):
     return render_template('404.html'), 404

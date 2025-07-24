@@ -55,6 +55,11 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('logout') }}" onclick="return confirm('This will clear your session and you can create a new profile. Continue?')">
+                                <i class="fas fa-sign-out-alt"></i> New Profile
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <span class="navbar-text">
                                 <small class="text-muted">{{ session.get('username') }} ({{ session.get('skill_level') }})</small>
                             </span>
