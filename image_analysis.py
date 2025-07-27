@@ -61,7 +61,10 @@ class ImageAnalysisService:
                 max_tokens=1000
             )
             
-            result = json.loads(response.choices[0].message.content)
+            response_content = response.choices[0].message.content
+            if not response_content:
+                raise ValueError("Empty response from OpenAI")
+            result = json.loads(response_content)
             return {
                 "success": True,
                 "analysis": result,

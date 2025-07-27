@@ -44,9 +44,20 @@ def check_rate_limit(ip_address, limit=5, window_seconds=60):
     return True
 
 def allowed_file(filename):
-    """Check if uploaded file has allowed extension"""
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    """Check if uploaded file has allowed extension and is safe"""
+    if not filename or not isinstance(filename, str):
+        return False
+    
+    # Check for basic path traversal attempts
+    if '..' in filename or '/' in filename or '\\' in filename:
+        return False
+    
+    # Check file extension
+    if '.' not in filename:
+        return False
+    
+    extension = filename.rsplit('.', 1)[1].lower()
+    return extension in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def index():
@@ -61,8 +72,32 @@ def onboarding():
         skill_level = request.form.get('skill_level', 'Beginner')
         main_specialization = request.form.get('main_specialization')
         
-        if not username or not main_specialization:
-            flash('Username and photography specialization are required', 'error')
+        # Input validation and sanitization
+        if not username or len(username) < 2 or len(username) > 50:
+            flash('Username must be between 2 and 50 characters', 'error')
+            return render_template('onboarding.html')
+        
+        # Sanitize username - allow only alphanumeric, spaces, and basic punctuation
+        import re
+        if not re.match(r'^[a-zA-Z0-9\s\-_\.]+$', username):
+            flash('Username contains invalid characters. Use only letters, numbers, spaces, hyphens, underscores, and periods.', 'error')
+            return render_template('onboarding.html')
+        
+        if skill_level not in ['Beginner', 'Intermediate', 'Advanced']:
+            flash('Invalid skill level selected', 'error')
+            return render_template('onboarding.html')
+        
+        if not main_specialization:
+            flash('Photography specialization is required', 'error')
+            return render_template('onboarding.html')
+        
+        # Validate specialization against allowed values
+        valid_specializations = [
+            'Portrait Photography', 'Fashion Photography', 'Sports Photography',
+            'Glamour Photography', 'Boudoir Photography', 'Headshot Photography'
+        ]
+        if main_specialization not in valid_specializations:
+            flash('Invalid photography specialization selected', 'error')
             return render_template('onboarding.html')
         
         # Check if user already exists
@@ -257,6 +292,16 @@ def send_message():
         session_token = data.get('session_token')
         uploaded_files = []
     
+    # Validate message content length and content
+    if message_content:
+        if len(message_content) > 5000:  # Reasonable message limit
+            return jsonify({'error': 'Message too long (max 5000 characters)'}), 400
+        
+        # Basic XSS prevention - escape HTML if needed
+        # Jinja2 auto-escapes by default, but additional validation here
+        if '<script>' in message_content.lower() or 'javascript:' in message_content.lower():
+            return jsonify({'error': 'Invalid message content'}), 400
+    
     if not message_content and not uploaded_files:
         return jsonify({'error': 'Message content or image is required'}), 400
     
@@ -278,14 +323,33 @@ def send_message():
     for file in uploaded_files:
         if file and file.filename and allowed_file(file.filename):
             try:
-                # Generate unique filename
+                # Generate unique filename with additional security
                 timestamp = str(int(time.time()))
                 filename = secure_filename(file.filename)
+                
+                # Additional filename sanitization
+                filename = filename.replace(' ', '_').replace('-', '_')
+                if not filename:
+                    filename = f"upload_{timestamp}.jpg"
+                
                 unique_filename = f"{timestamp}_{filename}"
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
                 
-                # Save file
+                # Ensure upload directory exists and is secure
+                os.makedirs(app.config['UPLOAD_FOLDER'], mode=0o755, exist_ok=True)
+                
+                # Check file size before saving
+                file.seek(0, os.SEEK_END)
+                file_size = file.tell()
+                file.seek(0)
+                
+                if file_size > MAX_FILE_SIZE:
+                    logging.error(f"File too large: {file_size} bytes")
+                    return jsonify({'error': 'File size exceeds 16MB limit'}), 413
+                
+                # Save file with restrictive permissions
                 file.save(file_path)
+                os.chmod(file_path, 0o644)  # Read-only for group/others
                 
                 # Create UploadedImage record
                 uploaded_image = UploadedImage()

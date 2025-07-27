@@ -26,7 +26,7 @@ class GearItem(db.Model):
     category: Mapped[str] = mapped_column(String(50), nullable=False)  # camera_body, lens, lighting, backdrop, accessory
     brand: Mapped[str] = mapped_column(String(100), nullable=False)
     model: Mapped[str] = mapped_column(String(200), nullable=False)
-    specifications: Mapped[Optional[str]] = mapped_column(JSON)  # Store additional specs as JSON
+    specifications: Mapped[Optional[dict]] = mapped_column(JSON)  # Store additional specs as JSON
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     
     # Relationships
@@ -39,7 +39,7 @@ class ChatSession(db.Model):
     user_id: Mapped[int] = mapped_column(Integer, db.ForeignKey('users.id'), nullable=False)
     session_token: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     current_step: Mapped[Optional[int]] = mapped_column(Integer, default=0)  # For beginner step tracking
-    conversation_context: Mapped[Optional[str]] = mapped_column(JSON)  # Store context as JSON
+    conversation_context: Mapped[Optional[dict]] = mapped_column(JSON)  # Store context as JSON
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -56,7 +56,7 @@ class ChatMessage(db.Model):
     message_type: Mapped[str] = mapped_column(String(20), nullable=False)  # user, bot, system
     content: Mapped[str] = mapped_column(Text, nullable=False)
     step_number: Mapped[Optional[int]] = mapped_column(Integer)  # For beginner step tracking
-    message_metadata: Mapped[Optional[str]] = mapped_column(JSON)  # Additional message data
+    message_metadata: Mapped[Optional[dict]] = mapped_column(JSON)  # Additional message data
     timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     
     # Relationships
@@ -73,7 +73,7 @@ class UploadedImage(db.Model):
     file_path: Mapped[str] = mapped_column(String(500), nullable=False)
     file_size: Mapped[int] = mapped_column(Integer, nullable=False)
     mime_type: Mapped[str] = mapped_column(String(100), nullable=False)
-    analysis_result: Mapped[Optional[str]] = mapped_column(JSON)  # Store AI analysis results
+    analysis_result: Mapped[Optional[dict]] = mapped_column(JSON)  # Store AI analysis results
     uploaded_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     
     # Relationships

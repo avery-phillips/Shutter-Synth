@@ -38,7 +38,8 @@ class SynthiaChatEngine:
         
         # Handle continuation responses for beginners
         if skill_level == 'Beginner' and self._is_continuation_response(message):
-            return self._handle_beginner_continuation(chat_session, user_gear)
+            matched_gear = self._match_user_gear(user_gear, current_scenario or "portrait")
+            return self._handle_beginner_continuation(chat_session, matched_gear)
         
         # Handle decline responses for beginners
         if skill_level == 'Beginner' and self._is_decline_response(message):
@@ -66,13 +67,15 @@ class SynthiaChatEngine:
     
     def _get_current_scenario(self, chat_session: ChatSession) -> Optional[str]:
         """Get the current conversation scenario from session context"""
-        if chat_session.conversation_context:
+        if chat_session.conversation_context and isinstance(chat_session.conversation_context, dict):
             return chat_session.conversation_context.get('current_scenario')
         return None
     
     def _set_current_scenario(self, chat_session: ChatSession, scenario: str):
         """Set the current conversation scenario in session context"""
         if not chat_session.conversation_context:
+            chat_session.conversation_context = {}
+        elif not isinstance(chat_session.conversation_context, dict):
             chat_session.conversation_context = {}
         chat_session.conversation_context['current_scenario'] = scenario
     
@@ -719,31 +722,7 @@ class SynthiaChatEngine:
         
         return content
     
-    def _apply_special_case_triggers(self, content: str, message: str, matched_gear: Dict[str, List[GearItem]]) -> str:
-        """Apply special case triggers for specific photography types"""
-        
-        message_lower = message.lower()
-        
-        # Astrophotography trigger
-        if any(word in message_lower for word in ['astrophotography', 'stars', 'milky way', 'night sky']):
-            if not matched_gear['lighting']:  # Skip Step 2 if no lighting gear
-                content += "\n\n**Note:** Since this is astrophotography, we'll focus on exposure, tripod use, and mobile workflow rather than artificial lighting."
-        
-        # Infrared triggers
-        if '590nm infrared' in message_lower:
-            content += "\n\n**Infrared Note:** 590nm creates Aerochrome-style looks with red/gold foliage. Consider custom white balance and channel swapping in post."
-        elif '720nm infrared' in message_lower:
-            content += "\n\n**Infrared Note:** 720nm produces the traditional IR look with white foliage and dark skies."
-        
-        # Drone trigger
-        if any(word in message_lower for word in ['drone', 'aerial', 'flying']):
-            content += "\n\n⚠️ **Drone Disclaimer:** FAA rules regarding drone registration, Remote ID, and airspace limits vary by location. Users should consult faa.gov/uas or the B4UFLY app before flying."
-        
-        # Group photography trigger
-        if any(word in message_lower for word in ['group', 'event', 'party']) and 'group' in message_lower:
-            content += "\n\n**Group Photography Tip:** When photographing groups of 3 or more, consider using f/4 or f/5.6 instead of f/2.8 to keep multiple faces sharp, especially if people are on different planes."
-        
-        return content
+
     
     def _serialize_gear(self, matched_gear: Dict[str, List[GearItem]]) -> Dict[str, List[Dict]]:
         """Serialize gear for JSON storage"""
