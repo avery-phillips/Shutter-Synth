@@ -91,10 +91,9 @@ def onboarding():
             flash('Photography specialization is required', 'error')
             return render_template('onboarding.html')
         
-        # Validate specialization against allowed values
+        # Validate specialization against allowed values (matching template options)
         valid_specializations = [
-            'Portrait Photography', 'Fashion Photography', 'Sports Photography',
-            'Glamour Photography', 'Boudoir Photography', 'Headshot Photography'
+            'Portrait', 'Fashion', 'Sports', 'Glamour', 'Boudoir', 'Headshot', 'General'
         ]
         if main_specialization not in valid_specializations:
             flash('Invalid photography specialization selected', 'error')
