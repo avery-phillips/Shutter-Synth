@@ -53,8 +53,9 @@ class SynthiaChatEngine:
         photography_style = self._extract_photography_style(message)
         
         if photography_style:
-            # Store new scenario in context
+            # Store new scenario in context and reset step count
             self._set_current_scenario(chat_session, photography_style)
+            chat_session.current_step = 0  # Reset for new conversation
             matched_gear = self._match_user_gear(user_gear, photography_style)
             
             if skill_level == 'Beginner':
@@ -451,7 +452,15 @@ class SynthiaChatEngine:
                 }
             }
         
-        return self._handle_beginner_continuation(chat_session, matched_gear)
+        # This should not be reached for new conversations
+        logging.warning("Unexpected code path in _generate_beginner_response")
+        return {
+            'content': "I'm ready to help you with your photography! What style or look are you going for?",
+            'step_number': None,
+            'next_step': 0,
+            'awaiting_continuation': False,
+            'context': {}
+        }
     
     def _should_skip_lighting_step(self, message: str, matched_gear: Dict[str, List[GearItem]]) -> bool:
         """Check if we should skip the lighting step for special cases like astrophotography"""
