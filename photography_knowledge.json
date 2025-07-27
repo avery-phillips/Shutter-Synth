@@ -123,5 +123,30 @@
       }
     },
     "keywords": ["sports", "action", "fast", "motion", "athletic", "dynamic", "freeze"]
+  },
+  "boudoir_intimate": {
+    "comprehensive": {
+      "setup": "Create intimate, flattering lighting with soft shadows and warm tones. Use window light or studio lights with large modifiers for gentle, romantic mood.",
+      "gear": "Use [LENS] for flattering compression and bokeh. [LIGHTING] with large softboxes or natural window light. Warm-toned gels optional.",
+      "angles": "Vary between intimate close-ups and elegant full-body poses. Shoot from flattering angles that elongate and flatter the subject's form.",
+      "camera_settings": "f/2.8-f/4 for selective focus, ISO 200-800, shutter 1/125s. Warm white balance (~3500K). Focus on eyes or key details.",
+      "pro_tip": "Communication and comfort are paramount. Create a safe, professional environment where your subject feels confident and beautiful."
+    },
+    "beginner_steps": {
+      "step1": {
+        "summary": "Boudoir photography with intimate, flattering lighting",
+        "scene_gear_overview": "**Location:** Private indoor space with window light or controlled studio setting\n**Visual Mood:** Intimate, romantic, flattering, confident\n**Recommended Lens:** [LENS] for beautiful compression and smooth bokeh\n**Starting Camera Settings:**\n- ISO: 200-800 (balance image quality with available light)\n- Aperture: f/2.8-f/4 (selective focus, flattering depth of field)\n- Shutter Speed: 1/125s (sharp handheld, account for subject movement)\n- **Manual White Balance:** ~3500K for warm, intimate feel\n- **Shoot RAW** for skin tone and warmth adjustments\n\n*Focus on creating a comfortable, professional environment above all else.*"
+      },
+      "step2": {
+        "lighting_setup": "**Primary Light:** Large window with sheer curtains, or [LIGHTING] with large softbox for soft, wrapping light\n**Fill Light:** Use reflectors to gently fill shadows - white for neutral, gold for warmth\n**Accent Light:** Optional hair light or rim light at very low power for subtle separation\n**Direction:** Soft side lighting or gentle front lighting - avoid harsh shadows\n\n**Intimate Lighting Tip:** Larger, softer light sources are more flattering for intimate photography. Window light is often perfect."
+      },
+      "step3": {
+        "posing_composition": "**Posing:** Focus on elegant, comfortable poses that flatter the subject's best features\n**Framing:** Mix intimate details, flattering portraits, and elegant full-body compositions\n**Camera Height:** Vary between eye level and slightly above for most flattering angles\n**Focus:** Sharp focus on eyes for portraits, or key details for artistic shots\n\n**Confidence Tip:** Provide gentle direction and positive reinforcement - your subject's comfort shows in every image."
+      },
+      "step4": {
+        "final_pro_tip": "**Final Pro Tip:** Boudoir photography is about capturing confidence and beauty. Take time between shots to review images together and celebrate what looks great. A comfortable, confident subject will always produce better images than perfect technical settings."
+      }
+    },
+    "keywords": ["boudoir", "intimate", "romantic", "flattering", "private", "personal", "elegant"]
   }
 }
