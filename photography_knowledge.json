@@ -148,5 +148,80 @@
       }
     },
     "keywords": ["boudoir", "intimate", "romantic", "flattering", "private", "personal", "elegant"]
+  },
+  "professional_headshot": {
+    "comprehensive": {
+      "setup": "Create sharp, professional headshots with even lighting and clean backgrounds. Focus on eye contact and confident expressions.",
+      "gear": "Use [LENS] with moderate telephoto focal length for flattering compression. [LIGHTING] with large softbox for even illumination. Professional backdrop or clean environment.",
+      "angles": "Shoot at eye level or slightly above. Frame from chest up, ensuring strong eye contact with camera. Use shallow depth of field to separate subject from background.",
+      "camera_settings": "f/4-f/5.6 for sharpness across face, ISO 100-400, shutter 1/125s. Critical focus on eyes. Use single point autofocus.",
+      "pro_tip": "Consistency is key for professional headshots. Develop a repeatable lighting setup and workflow for uniform results across multiple subjects."
+    },
+    "beginner_steps": {
+      "step1": {
+        "summary": "Professional headshot with clean, corporate aesthetic",
+        "scene_gear_overview": "**Location:** Controlled studio environment or clean office space\n**Visual Mood:** Professional, confident, approachable, clean\n**Recommended Lens:** [LENS] for flattering facial proportions and sharp detail\n**Starting Camera Settings:**\n- ISO: 100-400 (maximum image quality)\n- Aperture: f/4-f/5.6 (sharp focus across entire face)\n- Shutter Speed: 1/125s (eliminate any camera shake)\n- **Manual White Balance:** ~5200K for neutral, professional skin tones\n- **Shoot RAW** for precise color correction and skin tone adjustments\n\n*Professional headshots require precise focus on the eyes - use single point autofocus.*"
+      },
+      "step2": {
+        "lighting_setup": "**Key Light:** Position [LIGHTING] with large softbox directly in front and slightly above subject at 45-degree angle\n**Fill Light:** Use large white reflector on opposite side to eliminate harsh shadows\n**Background Light:** Separate light on backdrop to ensure clean, even background\n**Hair Light:** Optional rim light behind subject to separate hair from background\n\n**Professional Tip:** Butterfly lighting (light directly in front, slightly above) creates the most universally flattering pattern for corporate headshots."
+      },
+      "step3": {
+        "posing_composition": "**Posing:** Shoulders at slight angle to camera, body turned 1/4 turn away, chin slightly forward to define jawline\n**Expression:** Confident, approachable smile or serious professional look depending on use\n**Framing:** Tight crop from chest up, ensuring eyes are in upper third of frame\n**Eye Contact:** Direct eye contact with camera lens for maximum connection\n\n**Professional Tip:** Coach your subject to think of someone they respect while looking at the camera - this creates authentic, confident expressions."
+      },
+      "step4": {
+        "final_pro_tip": "**Final Pro Tip:** Professional headshots should be consistent and timeless. Avoid trendy posing or lighting that might date the image. Focus on clean, classic lighting and natural expressions that will serve your subject well for years."
+      }
+    },
+    "keywords": ["headshot", "professional", "corporate", "business", "linkedin", "actor", "executive"]
+  },
+  "lifestyle_portrait": {
+    "comprehensive": {
+      "setup": "Capture authentic moments in natural environments. Use available light and candid interactions to tell personal stories.",
+      "gear": "Use [LENS] for natural perspective and subject interaction. Minimal lighting setup - reflectors and natural light preferred. [LIGHTING] for subtle fill if needed.",
+      "angles": "Vary camera heights and angles. Capture both posed and candid moments. Include environmental context that tells the subject's story.",
+      "camera_settings": "f/2.8-f/4 for shallow depth of field, ISO 200-800, shutter 1/250s for movement. Use continuous autofocus for active subjects.",
+      "pro_tip": "The best lifestyle portraits happen between the 'official' shots. Keep shooting during transitions and natural moments."
+    },
+    "beginner_steps": {
+      "step1": {
+        "summary": "Lifestyle portrait capturing authentic personal moments",
+        "scene_gear_overview": "**Location:** Subject's natural environment - home, workplace, hobby location\n**Visual Mood:** Authentic, personal, storytelling, relaxed\n**Recommended Lens:** [LENS] for natural perspective and comfortable working distance\n**Starting Camera Settings:**\n- ISO: 200-800 (adapt to available light conditions)\n- Aperture: f/2.8-f/4 (subject separation with environmental context)\n- Shutter Speed: 1/250s (capture natural movement and gestures)\n- **White Balance:** Auto or match ambient light conditions\n- **Shoot RAW** for natural color grading and mood adjustments\n\n*Focus on capturing genuine expressions and natural interactions with the environment.*"
+      },
+      "step2": {
+        "lighting_setup": "**Primary Light:** Use natural window light or outdoor shade as main light source\n**Fill Light:** White or silver reflector to bounce natural light into shadows\n**Flash:** If using [LIGHTING], keep it subtle - bounce off ceiling or use as gentle fill light\n**Direction:** Look for soft, directional light that creates gentle modeling on the face\n\n**Lifestyle Tip:** Work with available light whenever possible - it feels more natural and allows for spontaneous moments."
+      },
+      "step3": {
+        "posing_composition": "**Interaction:** Encourage natural activities - cooking, reading, playing with pets, working on hobbies\n**Framing:** Mix close-ups showing emotion with wider shots showing environment and context\n**Camera Height:** Vary between eye level, above, and below for dynamic storytelling\n**Candid Moments:** Capture in-between moments when subject is focused on activity, not camera\n\n**Storytelling Tip:** Include props and environmental elements that reflect the subject's personality and interests."
+      },
+      "step4": {
+        "final_pro_tip": "**Final Pro Tip:** The best lifestyle portraits tell a story about who the person really is. Spend time talking with your subject about their interests before shooting - this connection shows in the final images and creates more authentic moments."
+      }
+    },
+    "keywords": ["lifestyle", "authentic", "personal", "storytelling", "candid", "natural", "environmental"]
+  },
+  "dramatic_low_key": {
+    "comprehensive": {
+      "setup": "Create high-contrast images with deep shadows and selective lighting. Use hard light sources and careful light control to sculpt dramatic mood.",
+      "gear": "Use [LENS] for impactful perspective. [LIGHTING] with grids, barn doors, or snoots for precise control. Black backdrop or dark environment.",
+      "angles": "Experiment with dramatic angles and asymmetrical compositions. Use shadow and negative space as compositional elements.",
+      "camera_settings": "f/2.8-f/4, ISO 400-1600, shutter 1/125s. Underexpose significantly. Spot meter on highlight areas.",
+      "pro_tip": "In low-key photography, what you don't light is as important as what you do light. Embrace the darkness."
+    },
+    "beginner_steps": {
+      "step1": {
+        "summary": "Dramatic low-key portrait with selective lighting",
+        "scene_gear_overview": "**Location:** Dark studio or room with controllable lighting\n**Visual Mood:** Dramatic, mysterious, high-contrast, cinematic\n**Recommended Lens:** [LENS] for dramatic perspective and sharp detail in lit areas\n**Starting Camera Settings:**\n- ISO: 400-1600 (allow some grain for mood)\n- Aperture: f/2.8-f/4 (balance sharpness with selective focus)\n- Shutter Speed: 1/125s (stable for precise lighting control)\n- **Manual White Balance:** ~3200K for warmer, moodier tone\n- **Shoot RAW** for shadow detail recovery and contrast control\n\n*Embrace underexposure - most of your image should be in deep shadow with selective highlights.*"
+      },
+      "step2": {
+        "lighting_setup": "**Key Light:** Single [LIGHTING] with grid or snoot for hard, directional light on specific facial features\n**Fill Light:** Minimal or no fill - use small reflector only if absolutely necessary for detail\n**Background:** Keep completely dark - use black backdrop or let background fall into shadow\n**Light Control:** Use flags, barn doors, or gobos to prevent light spill\n\n**Dramatic Lighting Tip:** Start with one light and add control modifiers. Less is more in low-key lighting."
+      },
+      "step3": {
+        "posing_composition": "**Positioning:** Place subject to create interesting shadow patterns across face and body\n**Expression:** Intense, contemplative, or mysterious expressions work best\n**Framing:** Use tight crops to emphasize lit areas, or wide shots showing subject emerging from darkness\n**Composition:** Use rule of thirds, but place lit areas on intersection points\n\n**Shadow Play:** Position light to create interesting shadow shapes - Rembrandt triangle, split lighting, or rim lighting effects."
+      },
+      "step4": {
+        "final_pro_tip": "**Final Pro Tip:** Low-key photography is about selective revelation. Don't try to light everything - choose one or two key areas to illuminate and let everything else fall into shadow. The mystery is what makes it compelling."
+      }
+    },
+    "keywords": ["low-key", "dramatic", "dark", "moody", "contrast", "shadows", "mysterious", "cinematic"]
   }
 }
